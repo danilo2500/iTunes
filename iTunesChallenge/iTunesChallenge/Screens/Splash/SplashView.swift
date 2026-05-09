@@ -13,7 +13,7 @@ struct SplashView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.brand, .black], startPoint: .topTrailing, endPoint: .bottomLeading)
+            GradientBackgroundView()
             if showLogo {
                 Image("musical-note")
                     .resizable()
@@ -32,3 +32,4 @@ struct SplashView: View {
 #Preview {
     SplashView()
 }
+
