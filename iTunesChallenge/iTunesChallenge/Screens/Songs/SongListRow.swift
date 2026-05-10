@@ -40,7 +40,6 @@ struct SongListRow: View {
             }
         }
         .tint(Color(.secondaryLabel))
-        .listRowBackground(Color.clear)
     }
 }
 

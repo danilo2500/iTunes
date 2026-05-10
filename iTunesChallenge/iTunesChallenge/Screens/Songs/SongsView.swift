@@ -17,7 +17,14 @@ struct SongsView: View {
         NavigationStack {
             List {
                 ForEach(viewModel.songs) { song in
-                    SongListRow(trackName: song.trackName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                    NavigationLink {
+                        
+                    } label: {
+                        SongListRow(trackName: song.trackName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                    }
+                    .listRowBackground(Color.clear)
+                    .navigationLinkIndicatorVisibility(.hidden)
+                    .listRowSeparator(.hidden)
                 }
             }
             .overlay {
@@ -38,6 +45,7 @@ struct SongsView: View {
                     ContentUnavailableView("", systemImage: "music.note", description: Text("Songs that you search or add will appear here"))
                 }
             }
+            
             .navigationTitle("Songs")
             .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search")
             .task(id: searchText) {
