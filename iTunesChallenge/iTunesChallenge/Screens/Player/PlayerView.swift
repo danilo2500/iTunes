@@ -35,9 +35,9 @@ struct PlayerView: View {
                     print("isEditing", isEditing)
                     viewModel.isScrubbing = isEditing
                 } minimumValueLabel: {
-                    Text("0:00")
+                    Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
                 } maximumValueLabel: {
-                    Text("0:00")
+                    Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
                 }
                 PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }

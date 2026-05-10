@@ -9,6 +9,15 @@ import AVFoundation
 
 @Observable
 class PlayerViewModel {
+    
+    var progress: Double = 0
+    var totalDuration: TimeInterval = 0
+    var currentTime: TimeInterval {
+        progress * totalDuration
+    }
+    var remainingTime: TimeInterval {
+        (totalDuration - currentTime) * -1
+    }
     var isRepeating = false
     var isPlaying = false {
         didSet {
@@ -22,8 +31,7 @@ class PlayerViewModel {
             }
         }
     }
-    var progress: Double = 0
-    
+
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var endObserver: Any?
@@ -83,6 +91,9 @@ class PlayerViewModel {
             guard let self = self else { return }
             guard let duration = self.player?.currentItem?.duration.seconds,
                   duration > 0 else { return }
+            
+            self.totalDuration = duration
+            
             if !isScrubbing && !isSeeking {
                 self.progress = time.seconds / duration
             }
