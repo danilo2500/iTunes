@@ -51,8 +51,18 @@ struct SongsView: View {
                 if viewModel.isLoading {
                     ProgressView()
                         .controlSize(.extraLarge)
-                } else if viewModel.songs.isEmpty {
-                    ContentUnavailableView("No songs", systemImage: "music.note.slash", description: Text("Search for an artist or album to see their songs"))
+                } else if let error = viewModel.error {
+                    ContentUnavailableView {
+                        Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
+                    } actions: {
+                        Button("Retry") {
+                            Task {
+                                await viewModel.search(query: searchText)
+                            }
+                        }
+                    }
+                } else {
+                    ContentUnavailableView("", systemImage: "music.note", description: Text("Songs that you search or add will appear here"))
                 }
             }
             .navigationTitle("Songs")
@@ -69,4 +79,3 @@ struct SongsView: View {
 #Preview {
     SongsView()
 }
-
