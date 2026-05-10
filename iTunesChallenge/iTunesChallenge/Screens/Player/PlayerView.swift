@@ -23,30 +23,13 @@ struct PlayerView: View {
                         .scaledToFit()
                         .clipShape(.rect(cornerRadius: 32))
                         .frame(maxWidth: 264)
-                    
                 default:
                     Image(systemName: "photo")
                 }
             }
             Spacer()
             VStack(spacing: 24) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(song.trackName)
-                        .font(.largeTitle.bold())
-                    LabeledContent {
-                        Button {
-                            viewModel.isRepeating.toggle()
-                        } label: {
-                            Image(systemName: viewModel.isRepeating ? "repeat.1" : "repeat")
-                                .symbolEffect(.bounce, value: viewModel.isRepeating)
-                        }
-                        .foregroundStyle(Color(.label))
-                    } label: {
-                        Text(song.artistName)
-                            .font(.headline.bold())
-                            .opacity(0.7)
-                    }
-                }
+                PlaybackHeader(trackName: song.trackName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
                 SliderView(progress: $viewModel.progress) { isEditing in
                     print("isEditing", isEditing)
                     viewModel.isScrubbing = isEditing
@@ -58,18 +41,16 @@ struct PlayerView: View {
                 PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }
         }
-        .onAppear {
-            viewModel.load(url: song.previewUrl)
-        }
         .padding()
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(song.artistName)
+        .onAppear {
+            viewModel.load(url: song.previewUrl)
+        }
     }
 }
 
-import SwiftUI
-
-struct PlaybackControlsView: View {
+fileprivate struct PlaybackControlsView: View {
     @Binding var isPlaying: Bool
     
     var body: some View {
@@ -111,132 +92,28 @@ struct PlaybackControlsView: View {
 
 import SwiftUI
 
-struct SliderView<MaxMinLabel: View>: View {
-    
-    @Binding var progress: Double
-    
-    let totalFrameHeight: CGFloat = 24
-    let thumbSize: CGFloat = 24
-    let sliderHeight: CGFloat = 8
-    
-    var onEditingChanged: (Bool) -> Void = { _ in }
-    
-    @ViewBuilder let minimumValueLabel: () -> MaxMinLabel
-    @ViewBuilder let maximumValueLabel: () -> MaxMinLabel
+fileprivate struct PlaybackHeader: View {
+    let trackName: String
+    let artistName: String
+    @Binding var isRepeating: Bool
     
     var body: some View {
-        VStack {
-            GeometryReader { proxy in
-                let trackWidth = proxy.size.width - thumbSize
-                let offset = thumbSize / 2 + trackWidth * progress
-                Slider(value: $progress) { isEditing in
-                    onEditingChanged(isEditing)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(trackName)
+                .font(.largeTitle.bold())
+            LabeledContent {
+                Button {
+                    isRepeating.toggle()
+                } label: {
+                    Image(systemName: isRepeating ? "repeat.1" : "repeat")
+                        .symbolEffect(.bounce, value: isRepeating)
                 }
-                .sliderThumbVisibility(.hidden)
-                .tint(.gray)
-                .overlay {
-                    Circle()
-                        .frame(width: thumbSize, height: thumbSize)
-                        .position(x: offset, y: (totalFrameHeight + sliderHeight) / 2)
-                        .allowsHitTesting(false)
-                }
+                .foregroundStyle(Color(.label))
+            } label: {
+                Text(artistName)
+                    .font(.headline.bold())
+                    .opacity(0.7)
             }
-            .frame(height: totalFrameHeight)
-            HStack {
-                minimumValueLabel()
-                Spacer()
-                maximumValueLabel()
-            }
-            .opacity(0.7)
-            .font(.footnote)
-        }
-    }
-}
-
-import AVFoundation
-
-@Observable
-class PlayerViewModel {
-    var isRepeating = false
-    var isPlaying = false {
-        didSet {
-            isPlaying ? play() : pause()
-        }
-    }
-    var isScrubbing = false {
-        didSet {
-            if !isScrubbing {
-                seek(to: progress)
-            }
-        }
-    }
-    var progress: Double = 0
-    
-    private var player: AVPlayer?
-    private var endObserver: Any?
-    private var isSeeking = false
-    private var url: URL?
-
-    func load(url: URL) {
-        self.url = url
-    }
-
-    func play() {
-        guard let url = url else { return }
-        if player == nil {
-            player = AVPlayer(url: url)
-            observeProgress()
-            observeEnd()
-        }
-        player?.play()
-    }
-    
-    func pause() {
-        player?.pause()
-    }
-    
-    func stop() {
-        player?.pause()
-        player = nil
-    }
-    
-    func seek(to progress: Double) {
-        guard let duration = player?.currentItem?.duration else { return }
-        let seconds = duration.seconds * progress
-        let time = CMTime(seconds: seconds, preferredTimescale: 600)
-        isSeeking = true
-        player?.seek(to: time) { _ in
-            self.progress = progress
-            self.isSeeking = false
-        }
-    }
-    
-    private func observeProgress() {
-        let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
-        player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self = self else { return }
-            guard let duration = self.player?.currentItem?.duration.seconds,
-                  duration > 0 else { return }
-            if !isScrubbing && !isSeeking {
-                self.progress = time.seconds / duration
-            }
-        }
-    }
-    
-    private func observeEnd() {
-        endObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: player?.currentItem,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            self.player?.seek(to: .zero)
-            if isRepeating {
-                self.player?.play()
-            } else {
-                isPlaying = false
-            }
-         
         }
     }
 }
