@@ -48,6 +48,7 @@ struct PlayerView: View {
                     }
                 }
                 SliderView(progress: $viewModel.progress) { isEditing in
+                    print("isEditing", isEditing)
                     viewModel.isScrubbing = isEditing
                 } minimumValueLabel: {
                     Text("0:00")
@@ -173,7 +174,7 @@ class PlayerViewModel {
     
     private var player: AVPlayer?
     private var endObserver: Any?
-    
+    private var isSeeking = false
     private var url: URL?
 
     func load(url: URL) {
@@ -203,8 +204,10 @@ class PlayerViewModel {
         guard let duration = player?.currentItem?.duration else { return }
         let seconds = duration.seconds * progress
         let time = CMTime(seconds: seconds, preferredTimescale: 600)
+        isSeeking = true
         player?.seek(to: time) { _ in
             self.progress = progress
+            self.isSeeking = false
         }
     }
     
@@ -214,7 +217,7 @@ class PlayerViewModel {
             guard let self = self else { return }
             guard let duration = self.player?.currentItem?.duration.seconds,
                   duration > 0 else { return }
-            if !isScrubbing {
+            if !isScrubbing && !isSeeking {
                 self.progress = time.seconds / duration
             }
         }
