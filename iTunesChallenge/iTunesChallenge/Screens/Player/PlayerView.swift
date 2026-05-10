@@ -13,7 +13,6 @@ struct PlayerView: View {
     @State private var audioPlayer = AudioPlayer()
     
     @State var songProgress = 0.0
-    @State var isPlaying = false
     @State private var isScrubbing = false
     
     var body: some View {
@@ -38,8 +37,13 @@ struct PlayerView: View {
                     Text(song.trackName)
                         .font(.largeTitle.bold())
                     LabeledContent {
-                        Image(systemName: "repeat")
-                            .foregroundStyle(.white)
+                        Button {
+                            audioPlayer.isRepeating.toggle()
+                        } label: {
+                            Image(systemName: audioPlayer.isRepeating ? "repeat.1" : "repeat")
+                                .symbolEffect(.bounce, value: audioPlayer.isRepeating)
+                        }
+                        .foregroundStyle(.white)
                     } label: {
                         Text(song.artistName)
                             .font(.headline.bold())
@@ -67,9 +71,9 @@ struct PlayerView: View {
                             Image(systemName: "backward.end.alt.fill")
                         }
                         Button {
-                            isPlaying.toggle()
+                            audioPlayer.isPlaying.toggle()
                         } label: {
-                            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
                                 .font(.title)
                                 .padding()
                                 .contentTransition(.symbolEffect(.replace))
@@ -86,7 +90,7 @@ struct PlayerView: View {
             }
         }
         .padding()
-        .onChange(of: isPlaying) { _, newValue in
+        .onChange(of: audioPlayer.isPlaying) { _, newValue in
             if newValue {
                 audioPlayer.play(url: song.previewUrl) { progress in
                     if !isScrubbing  {
@@ -152,12 +156,17 @@ import AVFoundation
 
 @Observable
 class AudioPlayer {
+    var isRepeating = false
+    var isPlaying = false
+
     private var player: AVPlayer?
-    
+    private var endObserver: Any?
+
     func play(url: URL, onProgress: @escaping (Double) -> Void) {
         if player == nil {
             player = AVPlayer(url: url)
             observeProgress(update: onProgress)
+            observeEnd()
         }
         player?.play()
     }
@@ -186,6 +195,23 @@ class AudioPlayer {
             guard let duration = self?.player?.currentItem?.duration.seconds,
                   duration > 0 else { return }
             update(time.seconds / duration)
+        }
+    }
+    
+    private func observeEnd() {
+        endObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player?.currentItem,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            self.player?.seek(to: .zero)
+            if isRepeating {
+                self.player?.play()
+            } else {
+                isPlaying = false
+            }
+         
         }
     }
 }
