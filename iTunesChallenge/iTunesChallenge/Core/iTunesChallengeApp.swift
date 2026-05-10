@@ -25,7 +25,7 @@ struct iTunesChallengeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SongsView()
         }
         .modelContainer(sharedModelContainer)
     }
