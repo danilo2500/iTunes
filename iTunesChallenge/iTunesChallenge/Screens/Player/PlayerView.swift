@@ -12,8 +12,9 @@ struct PlayerView: View {
     let song: ITunesSong
     @State private var audioPlayer = AudioPlayer()
     
-    @State var songPosition = 0.0
+    @State var songProgress = 0.0
     @State var isPlaying = false
+    @State private var isScrubbing = false
     
     var body: some View {
         VStack {
@@ -26,7 +27,7 @@ struct PlayerView: View {
                         .scaledToFit()
                         .clipShape(.rect(cornerRadius: 32))
                         .frame(maxWidth: 264)
-                        
+                    
                 default:
                     Image(systemName: "photo")
                 }
@@ -45,10 +46,18 @@ struct PlayerView: View {
                             .opacity(0.7)
                     }
                 }
-                SliderView(value: $songPosition) {
+                SliderView(progress: $songProgress) { isEditing in
+                    if isEditing {
+                        isScrubbing = true
+                    } else {
+                        audioPlayer.seek(to: songProgress) {
+                            isScrubbing = false
+                        }
+                    }
+                } minimumValueLabel: {
                     Text("vai")
                 } maximumValueLabel: {
-                    Text("toma")
+                    Text("vai")
                 }
                 ZStack {
                     HStack(spacing: 28) {
@@ -80,7 +89,9 @@ struct PlayerView: View {
         .onChange(of: isPlaying) { _, newValue in
             if newValue {
                 audioPlayer.play(url: song.previewUrl) { progress in
-                    songPosition = progress
+                    if !isScrubbing  {
+                        songProgress = progress
+                    }
                 }
             } else {
                 audioPlayer.pause()
@@ -97,11 +108,13 @@ import SwiftUI
 
 struct SliderView<MaxMinLabel: View>: View {
     
-    @Binding var value: Double
+    @Binding var progress: Double
     
     let totalFrameHeight: CGFloat = 24
     let thumbSize: CGFloat = 24
     let sliderHeight: CGFloat = 8
+    
+    var onEditingChanged: (Bool) -> Void = { _ in }
     
     @ViewBuilder let minimumValueLabel: () -> MaxMinLabel
     @ViewBuilder let maximumValueLabel: () -> MaxMinLabel
@@ -110,17 +123,18 @@ struct SliderView<MaxMinLabel: View>: View {
         VStack {
             GeometryReader { proxy in
                 let trackWidth = proxy.size.width - thumbSize
-                let offset = thumbSize / 2 + trackWidth * value
-                
-                Slider(value: $value)
-                    .sliderThumbVisibility(.hidden)
-                    .tint(.gray)
-                    .overlay {
-                        Circle()
-                            .frame(width: thumbSize, height: thumbSize)
-                            .position(x: offset, y: (totalFrameHeight + sliderHeight) / 2)
-                            .allowsHitTesting(false)
-                    }
+                let offset = thumbSize / 2 + trackWidth * progress
+                Slider(value: $progress) { isEditing in
+                    onEditingChanged(isEditing)
+                }
+                .sliderThumbVisibility(.hidden)
+                .tint(.gray)
+                .overlay {
+                    Circle()
+                        .frame(width: thumbSize, height: thumbSize)
+                        .position(x: offset, y: (totalFrameHeight + sliderHeight) / 2)
+                        .allowsHitTesting(false)
+                }
             }
             .frame(height: totalFrameHeight)
             HStack {
@@ -131,7 +145,6 @@ struct SliderView<MaxMinLabel: View>: View {
             .opacity(0.7)
             .font(.footnote)
         }
-        .animation(.default, value: value)
     }
 }
 
@@ -148,16 +161,25 @@ class AudioPlayer {
         }
         player?.play()
     }
-
+    
     func pause() {
         player?.pause()
     }
-
+    
     func stop() {
         player?.pause()
         player = nil
     }
-
+    
+    func seek(to progress: Double, completion: @escaping () -> Void = {}) {
+        guard let duration = player?.currentItem?.duration else { return }
+        let seconds = duration.seconds * progress
+        let time = CMTime(seconds: seconds, preferredTimescale: 600)
+        player?.seek(to: time) { _ in
+            completion()
+        }
+    }
+    
     private func observeProgress(update: @escaping (Double) -> Void) {
         let interval = CMTime(seconds: 0.2, preferredTimescale: 600)
         player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
