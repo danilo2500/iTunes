@@ -11,6 +11,7 @@ struct PlayerView: View {
     
     let song: ITunesSong
     @State private var viewModel = PlayerViewModel()
+    @State var showActionSheet = false
     
     var body: some View {
         VStack {
@@ -47,8 +48,22 @@ struct PlayerView: View {
         .onAppear {
             viewModel.load(url: song.previewUrl)
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showActionSheet = true
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+            }
+        }
+        .sheet(isPresented: $showActionSheet) {
+            PlayerActionSheet(trackName: song.trackName, artistName: song.artistName)
+        }
     }
 }
+
+
 
 fileprivate struct PlaybackControlsView: View {
     @Binding var isPlaying: Bool
