@@ -23,16 +23,17 @@ struct ITunesSong: Decodable, Identifiable {
     let trackName: String
     let artistName: String
     let previewUrl: URL
-//    let collectionName: String
+    let collectionName: String
     let artworkUrl100: URL
 //    let trackViewUrl: String
 //    let previewUrl: String
     
     static let mock = ITunesSong(
         trackId: 1228739609,
-        trackName: "Dua Lipa",
-        artistName: "New Rules",
-        previewUrl: URL(string: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/27/b9/19/27b91953-c211-b233-5dbb-69f498867492/mzaf_4936928956572532975.plus.aac.p.m4a")!,
-        artworkUrl100: URL(string: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c1/54/2d/c1542d45-c6c2-12ca-7308-6eacd762c562/190295807870.jpg/100x100bb.jpg")!
+        trackName: "Get Lucky",
+        artistName: "Daft Punk, Pharrell Williams & Nile Rodgers",
+        previewUrl: URL(string: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/d4/d3/1e/d4d31eb4-7405-b806-8346-3c52ad5b4cf4/mzaf_8095545455942962509.plus.aac.p.m4a")!,
+        collectionName: "Random Access Memories",
+        artworkUrl100: URL(string: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e8/43/5f/e8435ffa-b6b9-b171-40ab-4ff3959ab661/886443919266.jpg/100x100bb.jpg")!
     )
 }

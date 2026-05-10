@@ -10,7 +10,7 @@ import SwiftUI
 struct PlayerView: View {
     
     let song: ITunesSong
-    @State private var audioPlayer = AudioPlayer()
+    @State private var viewModel = PlayerViewModel()
     
     @State var songProgress = 0.0
     @State private var isScrubbing = false
@@ -38,10 +38,10 @@ struct PlayerView: View {
                         .font(.largeTitle.bold())
                     LabeledContent {
                         Button {
-                            audioPlayer.isRepeating.toggle()
+                            viewModel.isRepeating.toggle()
                         } label: {
-                            Image(systemName: audioPlayer.isRepeating ? "repeat.1" : "repeat")
-                                .symbolEffect(.bounce, value: audioPlayer.isRepeating)
+                            Image(systemName: viewModel.isRepeating ? "repeat.1" : "repeat")
+                                .symbolEffect(.bounce, value: viewModel.isRepeating)
                         }
                         .foregroundStyle(.white)
                     } label: {
@@ -54,7 +54,7 @@ struct PlayerView: View {
                     if isEditing {
                         isScrubbing = true
                     } else {
-                        audioPlayer.seek(to: songProgress) {
+                        viewModel.seek(to: songProgress) {
                             isScrubbing = false
                         }
                     }
@@ -63,49 +63,66 @@ struct PlayerView: View {
                 } maximumValueLabel: {
                     Text("vai")
                 }
-                ZStack {
-                    HStack(spacing: 28) {
-                        Button {
-                            
-                        } label: {
-                            Image(systemName: "backward.end.alt.fill")
-                        }
-                        Button {
-                            audioPlayer.isPlaying.toggle()
-                        } label: {
-                            Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.title)
-                                .padding()
-                                .contentTransition(.symbolEffect(.replace))
-                                .glassEffect()
-                        }
-                        Button {
-                            
-                        } label: {
-                            Image(systemName: "forward.end.alt.fill")
-                        }
-                    }
-                    .tint(Color(.label))
-                }
+                PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }
         }
         .padding()
-        .onChange(of: audioPlayer.isPlaying) { _, newValue in
+        .onChange(of: viewModel.isPlaying) { _, newValue in
             if newValue {
-                audioPlayer.play(url: song.previewUrl) { progress in
+                viewModel.play(url: song.previewUrl) { progress in
                     if !isScrubbing  {
                         songProgress = progress
                     }
                 }
             } else {
-                audioPlayer.pause()
+                viewModel.pause()
             }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(song.artistName)
+    }
+}
+
+import SwiftUI
+
+struct PlaybackControlsView: View {
+    @Binding var isPlaying: Bool
+    
+    var body: some View {
+        
+        HStack {
+            Spacer()
+            HStack(spacing: 28) {
+                Button {
+                    
+                } label: {
+                    Image(systemName: "backward.end.alt.fill")
+                }
+                Button {
+                    isPlaying.toggle()
+                } label: {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.title)
+                        .padding()
+                        .contentTransition(.symbolEffect(.replace))
+                        .glassEffect()
+                }
+                Button {
+                    
+                } label: {
+                    Image(systemName: "forward.end.alt.fill")
+                }
+            }
+            .tint(Color(.label))
+            Spacer()
         }
     }
 }
 
 #Preview {
-    PlayerView(song: .mock)
+    NavigationStack {
+        PlayerView(song: .mock)
+    }
 }
 
 import SwiftUI
@@ -155,7 +172,7 @@ struct SliderView<MaxMinLabel: View>: View {
 import AVFoundation
 
 @Observable
-class AudioPlayer {
+class PlayerViewModel {
     var isRepeating = false
     var isPlaying = false
 
