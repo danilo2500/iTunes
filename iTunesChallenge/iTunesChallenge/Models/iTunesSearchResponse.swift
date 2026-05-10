@@ -18,18 +18,16 @@ struct ITunesSong: Decodable, Identifiable {
     }
     
     let trackId: Int
-//    let artistId: Int
-//    let collectionId: Int
+    let collectionId: Int
     let trackName: String
     let artistName: String
     let previewUrl: URL
     let collectionName: String
     let artworkUrl100: URL
-//    let trackViewUrl: String
-//    let previewUrl: String
     
     static let mock = ITunesSong(
         trackId: 1228739609,
+        collectionId: 617154241,
         trackName: "Get Lucky",
         artistName: "Daft Punk, Pharrell Williams & Nile Rodgers",
         previewUrl: URL(string: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/d4/d3/1e/d4d31eb4-7405-b806-8346-3c52ad5b4cf4/mzaf_8095545455942962509.plus.aac.p.m4a")!,

@@ -32,7 +32,6 @@ struct PlayerView: View {
             VStack(spacing: 24) {
                 PlaybackHeader(trackName: song.trackName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
                 SliderView(progress: $viewModel.progress) { isEditing in
-                    print("isEditing", isEditing)
                     viewModel.isScrubbing = isEditing
                 } minimumValueLabel: {
                     Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
