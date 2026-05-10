@@ -23,7 +23,7 @@ struct ITunesSong: Decodable, Identifiable {
     let trackName: String
     let artistName: String
 //    let collectionName: String
-    let artworkUrl100: String
+    let artworkUrl100: URL
 //    let trackViewUrl: String
 //    let previewUrl: String
     
@@ -31,6 +31,6 @@ struct ITunesSong: Decodable, Identifiable {
         trackId: 1228739609,
         trackName: "Dua Lipa",
         artistName: "New Rules",
-        artworkUrl100: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c1/54/2d/c1542d45-c6c2-12ca-7308-6eacd762c562/190295807870.jpg/100x100bb.jpg"
+        artworkUrl100: URL(string: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c1/54/2d/c1542d45-c6c2-12ca-7308-6eacd762c562/190295807870.jpg/100x100bb.jpg")!
     )
 }

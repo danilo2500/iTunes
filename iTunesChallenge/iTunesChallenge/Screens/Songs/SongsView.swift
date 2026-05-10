@@ -18,8 +18,7 @@ struct SongsView: View {
             List {
                 ForEach(viewModel.songs) { song in
                     HStack(spacing: 16) {
-                        Image("musical-note")
-                            .resizable()
+                        AsyncImage(url: song.artworkUrl100)
                             .frame(width: 52, height: 52)
                             .clipShape(.rect(cornerRadius: 8))
                         LabeledContent {
@@ -61,7 +60,7 @@ struct SongsView: View {
                             }
                         }
                     }
-                } else {
+                } else if viewModel.songs.isEmpty {
                     ContentUnavailableView("", systemImage: "music.note", description: Text("Songs that you search or add will appear here"))
                 }
             }
