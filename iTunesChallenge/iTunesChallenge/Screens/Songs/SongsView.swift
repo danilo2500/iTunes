@@ -17,33 +17,7 @@ struct SongsView: View {
         NavigationStack {
             List {
                 ForEach(viewModel.songs) { song in
-                    HStack(spacing: 16) {
-                        AsyncImage(url: song.artworkUrl100)
-                            .frame(width: 52, height: 52)
-                            .clipShape(.rect(cornerRadius: 8))
-                        LabeledContent {
-                            Button {
-                                
-                            } label: {
-                                Image(systemName: "ellipsis")
-                            }
-                            .tint(Color(.secondaryLabel))
-                            .popover(isPresented: .constant(false)) {
-                                NavigationLink("View Album") {
-                                    EmptyView()
-                                }
-                                .padding()
-                                .presentationCompactAdaptation(.popover)
-                            }
-                            
-                        } label: {
-                            Text(song.trackName)
-                                .font(.callout)
-                            Text(song.artistName)
-                                .font(.caption)
-                        }
-                    }
-                    .listRowBackground(Color.clear)
+                    SongListRow(trackName: song.trackName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
                 }
             }
             .overlay {
@@ -74,6 +48,8 @@ struct SongsView: View {
         }
     }
 }
+
+
 
 #Preview {
     SongsView()
