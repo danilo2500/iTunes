@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct PlayerView: View {
+    
     let song: ITunesSong
+    @State private var audioPlayer = AudioPlayer()
     
     @State var songPosition = 0.0
     @State var isPlaying = false
@@ -75,6 +77,15 @@ struct PlayerView: View {
             }
         }
         .padding()
+        .onChange(of: isPlaying) { _, newValue in
+            if newValue {
+                audioPlayer.play(url: song.previewUrl) { progress in
+                    songPosition = progress
+                }
+            } else {
+                audioPlayer.pause()
+            }
+        }
     }
 }
 
@@ -119,6 +130,40 @@ struct SliderView<MaxMinLabel: View>: View {
             }
             .opacity(0.7)
             .font(.footnote)
+        }
+        .animation(.default, value: value)
+    }
+}
+
+import AVFoundation
+
+@Observable
+class AudioPlayer {
+    private var player: AVPlayer?
+    
+    func play(url: URL, onProgress: @escaping (Double) -> Void) {
+        if player == nil {
+            player = AVPlayer(url: url)
+            observeProgress(update: onProgress)
+        }
+        player?.play()
+    }
+
+    func pause() {
+        player?.pause()
+    }
+
+    func stop() {
+        player?.pause()
+        player = nil
+    }
+
+    private func observeProgress(update: @escaping (Double) -> Void) {
+        let interval = CMTime(seconds: 0.2, preferredTimescale: 600)
+        player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+            guard let duration = self?.player?.currentItem?.duration.seconds,
+                  duration > 0 else { return }
+            update(time.seconds / duration)
         }
     }
 }
