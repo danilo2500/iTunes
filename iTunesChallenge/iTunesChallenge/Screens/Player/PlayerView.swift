@@ -12,9 +12,6 @@ struct PlayerView: View {
     let song: ITunesSong
     @State private var viewModel = PlayerViewModel()
     
-    @State var songProgress = 0.0
-    @State private var isScrubbing = false
-    
     var body: some View {
         VStack {
             Spacer()
@@ -43,41 +40,27 @@ struct PlayerView: View {
                             Image(systemName: viewModel.isRepeating ? "repeat.1" : "repeat")
                                 .symbolEffect(.bounce, value: viewModel.isRepeating)
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.label))
                     } label: {
                         Text(song.artistName)
                             .font(.headline.bold())
                             .opacity(0.7)
                     }
                 }
-                SliderView(progress: $songProgress) { isEditing in
-                    if isEditing {
-                        isScrubbing = true
-                    } else {
-                        viewModel.seek(to: songProgress) {
-                            isScrubbing = false
-                        }
-                    }
+                SliderView(progress: $viewModel.progress) { isEditing in
+                    viewModel.isScrubbing = isEditing
                 } minimumValueLabel: {
-                    Text("vai")
+                    Text("0:00")
                 } maximumValueLabel: {
-                    Text("vai")
+                    Text("0:00")
                 }
                 PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }
         }
-        .padding()
-        .onChange(of: viewModel.isPlaying) { _, newValue in
-            if newValue {
-                viewModel.play(url: song.previewUrl) { progress in
-                    if !isScrubbing  {
-                        songProgress = progress
-                    }
-                }
-            } else {
-                viewModel.pause()
-            }
+        .onAppear {
+            viewModel.load(url: song.previewUrl)
         }
+        .padding()
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(song.artistName)
     }
@@ -174,15 +157,34 @@ import AVFoundation
 @Observable
 class PlayerViewModel {
     var isRepeating = false
-    var isPlaying = false
-
+    var isPlaying = false {
+        didSet {
+            isPlaying ? play() : pause()
+        }
+    }
+    var isScrubbing = false {
+        didSet {
+            if !isScrubbing {
+                seek(to: progress)
+            }
+        }
+    }
+    var progress: Double = 0
+    
     private var player: AVPlayer?
     private var endObserver: Any?
+    
+    private var url: URL?
 
-    func play(url: URL, onProgress: @escaping (Double) -> Void) {
+    func load(url: URL) {
+        self.url = url
+    }
+
+    func play() {
+        guard let url = url else { return }
         if player == nil {
             player = AVPlayer(url: url)
-            observeProgress(update: onProgress)
+            observeProgress()
             observeEnd()
         }
         player?.play()
@@ -197,21 +199,24 @@ class PlayerViewModel {
         player = nil
     }
     
-    func seek(to progress: Double, completion: @escaping () -> Void = {}) {
+    func seek(to progress: Double) {
         guard let duration = player?.currentItem?.duration else { return }
         let seconds = duration.seconds * progress
         let time = CMTime(seconds: seconds, preferredTimescale: 600)
         player?.seek(to: time) { _ in
-            completion()
+            self.progress = progress
         }
     }
     
-    private func observeProgress(update: @escaping (Double) -> Void) {
-        let interval = CMTime(seconds: 0.2, preferredTimescale: 600)
+    private func observeProgress() {
+        let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
         player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let duration = self?.player?.currentItem?.duration.seconds,
+            guard let self = self else { return }
+            guard let duration = self.player?.currentItem?.duration.seconds,
                   duration > 0 else { return }
-            update(time.seconds / duration)
+            if !isScrubbing {
+                self.progress = time.seconds / duration
+            }
         }
     }
     
