@@ -26,9 +26,11 @@ struct AlbumView: View {
                             Text(song.displayName)
                             Text(song.artistName)
                         } icon: {
-                            AsyncImage(url: song.artworkUrl100)
-                                .frame(width: 44, height: 44)
-                                .clipShape(.rect(cornerRadius: 8))
+                            AppAsyncImage(url: song.artworkUrl100) { image in
+                                image
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(.rect(cornerRadius: 8))
+                            }
                         }
                         .lineLimit(1)
                         .labelReservedIconWidth(52)
@@ -39,9 +41,12 @@ struct AlbumView: View {
             } header: {
                 if let album = viewModel.album {
                     VStack {
-                        AsyncImage(url: album.artworkUrl100)
-                            .frame(width: 120, height: 120)
-                            .clipShape(.rect(cornerRadius: 20))
+                        AppAsyncImage(url: album.artworkUrl100) { image in
+                            image
+                                .resizable()
+                                .frame(width: 120, height: 120)
+                                .clipShape(.rect(cornerRadius: 20))
+                        }
                         Text(album.collectionName)
                             .font(.title3)
                         Text(album.artistName)

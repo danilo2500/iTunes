@@ -16,9 +16,12 @@ struct SongListRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            AsyncImage(url: artworkUrl)
-                .frame(width: 52, height: 52)
-                .clipShape(.rect(cornerRadius: 8))
+            AppAsyncImage(url: artworkUrl) { image in
+                image
+                    .resizable()
+                    .clipShape(.rect(cornerRadius: 8))
+            }
+            .frame(width: 52, height: 52)
             LabeledContent {
                 Button {
                     

@@ -17,17 +17,12 @@ struct PlayerView: View {
     var body: some View {
         VStack {
             Spacer()
-            AsyncImage(url: song.artworkUrl100) { image in
-                switch image {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(.rect(cornerRadius: 32))
-                        .frame(maxWidth: 264)
-                default:
-                    Image(systemName: "photo")
-                }
+            AppAsyncImage(url: song.artworkUrl100) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(.rect(cornerRadius: 32))
+                    .frame(maxWidth: 264)
             }
             Spacer()
             VStack(spacing: 24) {
