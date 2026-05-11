@@ -9,23 +9,27 @@ import Foundation
 
 struct iTunesSearchResponse: Decodable {
     let resultCount: Int
-    let results: [ITunesSong]
+    let results: [ITunesMedia]
 }
 
-struct ITunesSong: Decodable, Identifiable {
-    var id: Int {
-        trackId
-    }
+struct ITunesMedia: Decodable, Hashable {
     
-    let trackId: Int
+    let wrapperType: WrapperType?
+    
+    let trackId: Int?
     let collectionId: Int
-    let trackName: String
+    let trackName: String?
     let artistName: String
-    let previewUrl: URL
+    let previewUrl: URL?
     let collectionName: String
     let artworkUrl100: URL
     
-    static let mock = ITunesSong(
+    var displayName: String {
+        trackName ?? collectionName
+    }
+
+    static let mock = ITunesMedia(
+        wrapperType: .track,
         trackId: 1228739609,
         collectionId: 617154241,
         trackName: "Get Lucky",
@@ -34,4 +38,10 @@ struct ITunesSong: Decodable, Identifiable {
         collectionName: "Random Access Memories",
         artworkUrl100: URL(string: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e8/43/5f/e8435ffa-b6b9-b171-40ab-4ff3959ab661/886443919266.jpg/100x100bb.jpg")!
     )
+}
+
+enum WrapperType: String, Decodable {
+    case collection
+    case track
+    case artist
 }

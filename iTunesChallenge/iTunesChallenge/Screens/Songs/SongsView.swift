@@ -12,18 +12,17 @@ struct SongsView: View {
     @State var viewModel = SongsViewModel()
     
     @State var searchText = ""
+    @Binding var path: NavigationPath
     
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(viewModel.songs) { song in
-                    NavigationLink {
-                        
+        List {
+                ForEach(viewModel.songs, id: \.self) { song in
+                    Button {
+                        path.append(song)
                     } label: {
-                        SongListRow(trackName: song.trackName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                        SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
                     }
                     .listRowBackground(Color.clear)
-                    .navigationLinkIndicatorVisibility(.hidden)
                     .listRowSeparator(.hidden)
                 }
             }
@@ -53,12 +52,11 @@ struct SongsView: View {
                 if Task.isCancelled { return }
                 await viewModel.search(query: searchText)
             }
-        }
     }
 }
 
 
 
 #Preview {
-    SongsView()
+    SongsView(path: .constant(NavigationPath()))
 }

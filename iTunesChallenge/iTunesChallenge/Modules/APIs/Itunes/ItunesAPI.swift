@@ -9,6 +9,7 @@ import Foundation
 
 enum ItunesAPI {
     case getSongs(query: String)
+    case getCollection(id: Int)
 }
 
 extension ItunesAPI: RESTRequest {
@@ -17,7 +18,12 @@ extension ItunesAPI: RESTRequest {
     }
 
     var path: String {
-        "/search"
+        switch self {
+        case .getSongs:
+            return "/search"
+        case .getCollection:
+            return "/lookup"
+        }
     }
 
     var queryItems: [URLQueryItem]? {
@@ -25,6 +31,12 @@ extension ItunesAPI: RESTRequest {
         case .getSongs(let query):
             return [
                 URLQueryItem(name: "term", value: query),
+                URLQueryItem(name: "entity", value: "song"),
+                URLQueryItem(name: "media", value: "music"),
+            ]
+        case .getCollection(let id):
+            return [
+                URLQueryItem(name: "id", value: String(id)),
                 URLQueryItem(name: "entity", value: "song"),
                 URLQueryItem(name: "media", value: "music"),
             ]

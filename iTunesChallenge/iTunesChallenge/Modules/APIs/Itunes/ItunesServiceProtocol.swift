@@ -10,4 +10,5 @@ import Foundation
 
 protocol ItunesServiceProtocol {
     func fetchSongs(query: String) async throws -> iTunesSearchResponse
+    func fetchCollection(id: Int) async throws -> iTunesSearchResponse
 }

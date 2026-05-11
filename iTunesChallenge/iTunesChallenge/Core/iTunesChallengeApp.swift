@@ -31,7 +31,7 @@ struct iTunesChallengeApp: App {
                 if showSplash {
                     SplashView()
                 } else {
-                    SongsView()
+                    AppNavigationView()
                         .modelContainer(sharedModelContainer)
                         .transition(.blurReplace)
                 }

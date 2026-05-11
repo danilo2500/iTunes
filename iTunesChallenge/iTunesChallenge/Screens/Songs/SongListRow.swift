@@ -44,6 +44,6 @@ struct SongListRow: View {
 }
 
 #Preview {
-    let song = ITunesSong.mock
-    SongListRow(trackName: song.trackName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+    let song = ITunesMedia.mock
+    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
 }

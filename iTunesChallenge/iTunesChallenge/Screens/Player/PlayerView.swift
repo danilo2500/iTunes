@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PlayerView: View {
     
-    let song: ITunesSong
+    let song: ITunesMedia
+    @Binding var path: NavigationPath
     @State private var viewModel = PlayerViewModel()
     @State var showActionSheet = false
     
@@ -30,15 +31,17 @@ struct PlayerView: View {
             }
             Spacer()
             VStack(spacing: 24) {
-                PlaybackHeader(trackName: song.trackName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
-                SliderView(progress: $viewModel.progress) { isEditing in
-                    viewModel.isScrubbing = isEditing
-                } minimumValueLabel: {
-                    Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
-                } maximumValueLabel: {
-                    Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
+                PlaybackHeader(trackName: song.displayName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
+                if viewModel.previewURL != nil {
+                    SliderView(progress: $viewModel.progress) { isEditing in
+                        viewModel.isScrubbing = isEditing
+                    } minimumValueLabel: {
+                        Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
+                    } maximumValueLabel: {
+                        Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
+                    }
+                    PlaybackControlsView(isPlaying: $viewModel.isPlaying)
                 }
-                PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }
         }
         .padding()
@@ -57,7 +60,7 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showActionSheet) {
-            PlayerActionSheet(trackName: song.trackName, artistName: song.artistName)
+            PlayerActionSheet(trackName: song.displayName, artistName: song.artistName, collectionId: song.collectionId, path: $path)
         }
     }
 }
@@ -100,7 +103,7 @@ fileprivate struct PlaybackControlsView: View {
 
 #Preview {
     NavigationStack {
-        PlayerView(song: .mock)
+        PlayerView(song: .mock, path: .constant(NavigationPath()))
     }
 }
 

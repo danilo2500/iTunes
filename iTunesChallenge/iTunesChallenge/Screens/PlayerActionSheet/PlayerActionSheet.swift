@@ -5,20 +5,23 @@
 //  Created by Danilo Henrique on 10/05/26.
 //
 
-
-
 import SwiftUI
 
 struct PlayerActionSheet: View {
     
     let trackName: String
     let artistName: String
+    let collectionId: Int
+    
+    @Binding var path: NavigationPath
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
             List {
                 Button("View album", systemImage: "music.note.square.stack") {
-                    
+                    dismiss()
+                    path.append(collectionId)
                 }
                 .foregroundStyle(Color(.label))
                 .listRowBackground(Color.clear)
@@ -40,6 +43,5 @@ struct PlayerActionSheet: View {
 }
 
 #Preview {
-    let song = ITunesSong.mock
-    PlayerActionSheet(trackName: song.trackName, artistName: song.artistName)
+    PlayerActionSheet(trackName: "Song", artistName: "Artist", collectionId: 123, path: .constant(NavigationPath()))
 }

@@ -14,4 +14,8 @@ final class ItunesService: ItunesServiceProtocol {
     func fetchSongs(query: String) async throws -> iTunesSearchResponse {
         return try await restService.request(.getSongs(query: query))
     }
+    
+    func fetchCollection(id: Int) async throws -> iTunesSearchResponse {
+        return try await restService.request(.getCollection(id: id))
+    }
 }

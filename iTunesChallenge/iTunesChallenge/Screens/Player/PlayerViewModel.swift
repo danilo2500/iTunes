@@ -31,12 +31,13 @@ class PlayerViewModel {
             }
         }
     }
-
+    var previewURL: URL?
+    
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var endObserver: Any?
     private var isSeeking = false
-    private var url: URL?
+    
     
     deinit {
         if let observer = timeObserver {
@@ -48,13 +49,13 @@ class PlayerViewModel {
         player?.pause()
     }
     
-    func load(url: URL) {
-        self.url = url
+    func load(url: URL?) {
+        self.previewURL = url
     }
     
     func play() {
-        guard let url = url else {
-            debugPrint("URL not loaded")
+        guard let url = previewURL else {
+            debugPrint("URL not loaded or nil")
             return
         }
         if player == nil {
@@ -86,7 +87,7 @@ class PlayerViewModel {
     }
     
     private func observeProgress() {
-        let interval = CMTime(seconds: 0.2, preferredTimescale: 600)
+        let interval = CMTime(seconds: 0.1, preferredTimescale: 600)
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self = self else { return }
             guard let duration = self.player?.currentItem?.duration.seconds,

@@ -10,7 +10,7 @@ import Foundation
 @Observable
 final class SongsViewModel {
     
-    var songs: [ITunesSong] = []
+    var songs: [ITunesMedia] = []
     var isLoading = false
     var error: Error?
     
