@@ -22,26 +22,11 @@ struct iTunesChallengeApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
-    
-    @State private var showSplash = true
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if showSplash {
-                    SplashView()
-                } else {
-                    AppNavigationView()
-                        .modelContainer(sharedModelContainer)
-                        .transition(.blurReplace)
-                }
-            }
-            .task {
-                try? await Task.sleep(for: .seconds(1))
-                showSplash = false
-            }
-            .animation(.default, value: showSplash)
+            AppNavigationView()
+                .modelContainer(sharedModelContainer)
         }
-        
     }
 }

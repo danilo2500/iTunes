@@ -26,8 +26,6 @@ final class SongsViewModel {
     
     //MARK: - Functions
     
-    //MARK: - Private Functions
-    
     func search(query: String) async {
         guard !query.isEmpty else {
             songs.removeAll()
@@ -41,6 +39,7 @@ final class SongsViewModel {
             let response = try await itunesService.fetchSongs(query: query)
             songs = response.results
         } catch {
+            if Task.isCancelled { return }
             self.error = error
         }
     }
