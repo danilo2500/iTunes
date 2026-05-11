@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import SwiftData
 
 @Observable
 class PlayerViewModel {
@@ -51,6 +52,15 @@ class PlayerViewModel {
     
     func load(url: URL?) {
         self.previewURL = url
+    }
+
+    func saveAsRecent(song: ITunesMedia, modelContext: ModelContext) {
+        let cachedSongs = (try? modelContext.fetch(FetchDescriptor<RecentSong>())) ?? []
+        if let trackId = song.trackId {
+            if cachedSongs.contains(where: { $0.trackId == trackId }) { return }
+        }
+        modelContext.insert(RecentSong(from: song))
+        try? modelContext.save()
     }
     
     func play() {

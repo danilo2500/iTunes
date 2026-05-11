@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct PlayerView: View {
     
@@ -13,6 +14,7 @@ struct PlayerView: View {
     @Binding var path: NavigationPath
     @State private var viewModel = PlayerViewModel()
     @State var showActionSheet = false
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         VStack {
@@ -44,6 +46,9 @@ struct PlayerView: View {
         .navigationTitle(song.artistName)
         .onAppear {
             viewModel.load(url: song.previewUrl)
+        }
+        .onDisappear {
+            viewModel.saveAsRecent(song: song, modelContext: modelContext)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

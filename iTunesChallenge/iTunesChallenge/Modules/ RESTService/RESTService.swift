@@ -15,6 +15,7 @@ class RESTService<T: RESTRequest> {
         let urlRequest = try createURLRequest(with: request)
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
+            print(response)
             return try decodeResponse(data: data)
         } catch {
             throw error
