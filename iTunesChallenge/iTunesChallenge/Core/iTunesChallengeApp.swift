@@ -12,7 +12,7 @@ import SwiftData
 struct iTunesChallengeApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            RecentSong.self,
+            CachedSong.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

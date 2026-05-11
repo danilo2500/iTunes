@@ -15,7 +15,7 @@ struct SongsView: View {
     @State var searchText = ""
     @Binding var path: NavigationPath
     
-    @Query var cachedSongs: [RecentSong]
+    @Query var cachedSongs: [CachedSong]
     
     var body: some View {
         List {

@@ -55,11 +55,11 @@ class PlayerViewModel {
     }
 
     func saveAsRecent(song: ITunesMedia, modelContext: ModelContext) {
-        let cachedSongs = (try? modelContext.fetch(FetchDescriptor<RecentSong>())) ?? []
+        let cachedSongs = (try? modelContext.fetch(FetchDescriptor<CachedSong>())) ?? []
         if let trackId = song.trackId {
             if cachedSongs.contains(where: { $0.trackId == trackId }) { return }
         }
-        modelContext.insert(RecentSong(from: song))
+        modelContext.insert(CachedSong(from: song))
         try? modelContext.save()
     }
     

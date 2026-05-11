@@ -17,9 +17,8 @@ final class CachedSong {
     var previewUrl: URL?
     var collectionName: String
     var artworkUrl100: URL
-    var playedAt: Date
 
-    init(from media: ITunesMedia, playedAt: Date = .now) {
+    init(from media: ITunesMedia) {
         self.trackId = media.trackId ?? 0
         self.collectionId = media.collectionId
         self.trackName = media.trackName
@@ -27,7 +26,6 @@ final class CachedSong {
         self.previewUrl = media.previewUrl
         self.collectionName = media.collectionName
         self.artworkUrl100 = media.artworkUrl100
-        self.playedAt = playedAt
     }
 
     var asITunesMedia: ITunesMedia {
