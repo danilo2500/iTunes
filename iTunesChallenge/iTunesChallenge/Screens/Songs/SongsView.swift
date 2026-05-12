@@ -23,7 +23,9 @@ struct SongsView: View {
                 Button {
                     path.append(AppDestination.player(song))
                 } label: {
-                    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId) {
+                            path.append(AppDestination.album(collectionID: song.collectionId))
+                        }
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -34,7 +36,9 @@ struct SongsView: View {
                         Button {
                             path.append(AppDestination.player(song.asPlayableMedia))
                         } label: {
-                            SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                            SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId) {
+                                path.append(AppDestination.album(collectionID: song.collectionId))
+                            }
                         }
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)

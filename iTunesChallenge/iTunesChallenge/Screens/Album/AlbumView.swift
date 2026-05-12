@@ -119,7 +119,9 @@ final class AlbumViewModel {
         
         do {
             let response = try await itunesService.fetchCollection(id: collectionID)
-            songs = response.results.map(\.asPlayableMedia)
+            songs = response.results
+                .filter({ $0.wrapperType == .track })
+                .map(\.asPlayableMedia)
         } catch {
             print(error)
             self.error = error

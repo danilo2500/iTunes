@@ -36,7 +36,7 @@ class PlayerViewModel {
     var previewURL: URL?
     var isOnline = true
     var isPlaybackControlsDisabled: Bool {
-        !isOnline && cachedLocalURL == nil
+        (!isOnline && cachedLocalURL == nil) || previewURL == nil
     }
     private var cachedLocalURL: URL?
     private let pathMonitor = NWPathMonitor()
@@ -98,7 +98,7 @@ class PlayerViewModel {
     
     func play() {
         guard let url = cachedLocalURL ?? previewURL else {
-            debugPrint("URL not loaded or nil")
+            debugPrint("this song has no previewURL nor is cached")
             return
         }
         if player == nil {

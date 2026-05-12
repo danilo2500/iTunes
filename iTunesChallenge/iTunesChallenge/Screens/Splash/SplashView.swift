@@ -14,6 +14,9 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             GradientBackgroundView()
+            let color1: Color = showLogo ? .black : .brand
+            let color2: Color = showLogo ? .brand : .black
+            LinearGradient(colors: [color1, color2], startPoint: .topTrailing, endPoint: .bottomLeading)
             if showLogo {
                 Image("musical-note")
                     .resizable()
@@ -21,7 +24,7 @@ struct SplashView: View {
                     .transition(.scale)
             }
         }
-        .animation(.default, value: showLogo)
+        .animation(.default.speed(0.2), value: showLogo)
         .ignoresSafeArea()
         .onAppear {
             showLogo = true

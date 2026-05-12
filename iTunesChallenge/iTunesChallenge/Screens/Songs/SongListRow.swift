@@ -13,6 +13,10 @@ struct SongListRow: View {
     let trackName: String
     let artistName: String
     let artworkUrl: URL
+    let collectionId: Int
+    let onViewAlbum: () -> Void
+    
+    @State private var showPopover = false
     
     var body: some View {
         HStack(spacing: 16) {
@@ -33,18 +37,18 @@ struct SongListRow: View {
             .lineLimit(1)
             Spacer()
             Button {
-                
+                showPopover = true
             } label: {
                 Image(systemName: "ellipsis")
             }
-            .popover(isPresented: .constant(false)) {
-                NavigationLink("View Album") {
-                    EmptyView()
+            .popover(isPresented: $showPopover) {
+                Button("View Album") {
+                    showPopover = false
+                    onViewAlbum()
                 }
                 .padding()
                 .presentationCompactAdaptation(.popover)
             }
-            
         }
         .tint(Color(.secondaryLabel))
     }
@@ -52,5 +56,6 @@ struct SongListRow: View {
 
 #Preview {
     let song = ITunesMedia.mock
-    SongListRow(trackName: song.displayName + "1231231231dkls k askdkas d lkas dk", artistName: song.artistName, artworkUrl: song.artworkUrl100)
+    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId) {
+    }
 }
