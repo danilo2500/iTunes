@@ -10,7 +10,7 @@ import SwiftUI
 struct AlbumView: View {
     
     let collectionID: Int
-    
+    let showHeader: Bool
     @Binding var path: NavigationPath
     @State var viewModel = AlbumViewModel()
     
@@ -39,22 +39,24 @@ struct AlbumView: View {
                     .listRowSeparator(.hidden)
                 }
             } header: {
-                if let album = viewModel.album {
-                    VStack {
-                        AppAsyncImage(url: album.artworkUrl100) { image in
-                            image
-                                .resizable()
-                                .frame(width: 120, height: 120)
-                                .clipShape(.rect(cornerRadius: 20))
+                if showHeader {
+                    if let album = viewModel.album {
+                        VStack {
+                            AppAsyncImage(url: album.artworkUrl100) { image in
+                                image
+                                    .resizable()
+                                    .frame(width: 120, height: 120)
+                                    .clipShape(.rect(cornerRadius: 20))
+                            }
+                            Text(album.collectionName)
+                                .font(.title3)
+                            Text(album.artistName)
+                                .font(.footnote)
                         }
-                        Text(album.collectionName)
-                            .font(.title3)
-                        Text(album.artistName)
-                            .font(.footnote)
+                        .foregroundStyle(Color(.label))
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 48)
                     }
-                    .foregroundStyle(Color(.label))
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 48)
                 }
             }
         }
@@ -84,7 +86,7 @@ struct AlbumView: View {
 }
 
 #Preview {
-    AlbumView(collectionID: 617154241, path: .constant(NavigationPath()))
+    AlbumView(collectionID: 617154241, showHeader: true, path: .constant(NavigationPath()))
 }
 
 import Foundation

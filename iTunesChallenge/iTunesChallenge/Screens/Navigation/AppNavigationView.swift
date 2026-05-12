@@ -25,7 +25,7 @@ struct AppNavigationView: View {
                             case .player(let item):
                                 PlayerView(song: item, path: $path)
                             case .album(let id):
-                                AlbumView(collectionID: id, path: $path)
+                                AlbumView(collectionID: id, showHeader: true, path: $path)
                             }
                         }
                 }

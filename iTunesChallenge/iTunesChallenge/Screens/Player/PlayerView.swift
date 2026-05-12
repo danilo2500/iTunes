@@ -14,6 +14,7 @@ struct PlayerView: View {
     @Binding var path: NavigationPath
     @State private var viewModel = PlayerViewModel()
     @State var showActionSheet = false
+    @State private var isIPad = UIDevice.current.userInterfaceIdiom == .pad
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
@@ -60,6 +61,10 @@ struct PlayerView: View {
         }
         .sheet(isPresented: $showActionSheet) {
             PlayerActionSheet(trackName: song.displayName, artistName: song.artistName, collectionId: song.collectionId, path: $path)
+        }
+        .inspector(isPresented: $isIPad) {
+            AlbumView(collectionID: song.collectionId, showHeader: false, path: $path)
+                .inspectorColumnWidth(280)
         }
     }
 }
