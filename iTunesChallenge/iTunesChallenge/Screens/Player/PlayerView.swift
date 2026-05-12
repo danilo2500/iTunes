@@ -14,7 +14,7 @@ struct PlayerView: View {
     @Binding var path: NavigationPath
     @State private var viewModel = PlayerViewModel()
     @State var showActionSheet = false
-    @State private var isIPad = UIDevice.current.userInterfaceIdiom == .pad
+    @State var showInspector = true
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
@@ -44,25 +44,36 @@ struct PlayerView: View {
         .padding()
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(song.artistName)
-        .onAppear {
-            viewModel.load(url: song.previewUrl)
+        .onChange(of: song, initial: true) { _, newSong in
+            viewModel.load(url: newSong.previewUrl)
         }
         .onDisappear {
             viewModel.persistSongMetadata(song, modelContext: modelContext)
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem {
                 Button {
-                    showActionSheet = true
+                    showInspector.toggle()
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Image(systemName: "music.note.list")
+                }
+            }
+            ToolbarSpacer()
+            let isIPad = UIDevice.current.userInterfaceIdiom == .pad
+            if isIPad {
+                ToolbarItem {
+                    Button {
+                        showActionSheet = true
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
                 }
             }
         }
         .sheet(isPresented: $showActionSheet) {
             PlayerActionSheet(trackName: song.displayName, artistName: song.artistName, collectionId: song.collectionId, path: $path)
         }
-        .inspector(isPresented: $isIPad) {
+        .inspector(isPresented: $showInspector) {
             AlbumView(collectionID: song.collectionId, showHeader: false, path: $path)
                 .inspectorColumnWidth(280)
         }

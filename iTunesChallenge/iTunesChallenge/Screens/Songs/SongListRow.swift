@@ -31,6 +31,7 @@ struct SongListRow: View {
                     .foregroundStyle(Color(.secondaryLabel))
             }
             .lineLimit(1)
+            Spacer()
             Button {
                 
             } label: {

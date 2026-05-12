@@ -67,9 +67,15 @@ class PlayerViewModel {
     }
     
     func load(url: URL?) {
+        stop()
+        progress = 0
         self.previewURL = url
         
         cacheRemoteAudioIfNeeded()
+        
+        if isPlaying {
+            play()
+        }
     }
 
     func persistSongMetadata(_ song: PlayableMedia, modelContext: ModelContext) {
