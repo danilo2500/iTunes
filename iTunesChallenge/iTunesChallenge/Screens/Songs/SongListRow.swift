@@ -14,8 +14,8 @@ struct SongListRow: View {
     let artistName: String
     let artworkUrl: URL
     let collectionId: Int
-    let onViewAlbum: () -> Void
     
+    @Binding var path: NavigationPath
     @State private var showPopover = false
     
     var body: some View {
@@ -44,7 +44,7 @@ struct SongListRow: View {
             .popover(isPresented: $showPopover) {
                 Button("View Album") {
                     showPopover = false
-                    onViewAlbum()
+                    path.append(AppDestination.album(collectionID: collectionId))
                 }
                 .padding()
                 .presentationCompactAdaptation(.popover)
@@ -56,6 +56,5 @@ struct SongListRow: View {
 
 #Preview {
     let song = ITunesMedia.mock
-    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId) {
-    }
+    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: .constant(NavigationPath()))
 }
