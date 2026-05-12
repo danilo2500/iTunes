@@ -51,22 +51,22 @@ struct PlayerView: View {
             viewModel.persistSongMetadata(song, modelContext: modelContext)
         }
         .toolbar {
-            ToolbarItem {
-                Button {
-                    showInspector.toggle()
-                } label: {
-                    Image(systemName: "music.note.list")
-                }
-            }
-            ToolbarSpacer()
             let isIPad = UIDevice.current.userInterfaceIdiom == .pad
             if isIPad {
                 ToolbarItem {
                     Button {
-                        showActionSheet = true
+                        showInspector.toggle()
                     } label: {
-                        Image(systemName: "ellipsis")
+                        Image(systemName: "music.note.list")
                     }
+                }
+            }
+            ToolbarSpacer()
+            ToolbarItem {
+                Button {
+                    showActionSheet = true
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
             }
         }
