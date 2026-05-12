@@ -19,24 +19,26 @@ struct SongsView: View {
     
     var body: some View {
         List {
-            ForEach(viewModel.songs, id: \.self) { song in
+            ForEach(viewModel.songs, id: \.self.trackId) { song in
                 Button {
-                    path.append(song)
+                    path.append(AppDestination.player(song))
                 } label: {
                     SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }
-            Section("Recently Played") {
-                ForEach(cachedSongs, id: \.self) { cachedSong in
-                    Button {
-                        path.append(cachedSong.asITunesMedia)
-                    } label: {
-                        SongListRow(trackName: cachedSong.trackName ?? cachedSong.collectionName, artistName: cachedSong.artistName, artworkUrl: cachedSong.artworkUrl100)
+            if !cachedSongs.isEmpty {
+                Section("Recently Played") {
+                    ForEach(cachedSongs, id: \.self) { song in
+                        Button {
+                            path.append(AppDestination.player(song.asPlayableMedia))
+                        } label: {
+                            SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
                 }
             }
         }
@@ -54,13 +56,10 @@ struct SongsView: View {
                         }
                     }
                 }
-            } else if !searchText.isEmpty && viewModel.songs.isEmpty {
-                ContentUnavailableView.search
-            } else if searchText.isEmpty && cachedSongs.isEmpty {
-                ContentUnavailableView("", systemImage: "music.note", description: Text("Songs that you search or add will appear here"))
+            } else if (viewModel.songs + cachedSongs.map(\.asPlayableMedia)).isEmpty {
+                ContentUnavailableView("No Songs yet", systemImage: "music.note", description: Text("recent songs will appear here"))
             }
         }
-        
         .navigationTitle("Songs")
         .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search")
         .task(id: searchText) {

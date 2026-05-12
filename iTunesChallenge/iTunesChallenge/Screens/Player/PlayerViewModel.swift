@@ -54,12 +54,20 @@ class PlayerViewModel {
         self.previewURL = url
     }
 
-    func saveAsRecent(song: ITunesMedia, modelContext: ModelContext) {
+    func saveAsRecent(song: PlayableMedia, modelContext: ModelContext) {
         let cachedSongs = (try? modelContext.fetch(FetchDescriptor<CachedSong>())) ?? []
         if let trackId = song.trackId {
             if cachedSongs.contains(where: { $0.trackId == trackId }) { return }
         }
-        modelContext.insert(CachedSong(from: song))
+        let cachedSong = CachedSong(
+            trackId: song.trackId ?? song.collectionId,
+            collectionId: song.collectionId,
+            artistName: song.artistName,
+            previewUrl: song.previewUrl,
+            collectionName: song.collectionName,
+            artworkUrl100: song.artworkUrl100
+        )
+        modelContext.insert(cachedSong)
         try? modelContext.save()
     }
     

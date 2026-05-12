@@ -10,7 +10,8 @@ import SwiftData
 
 @Model
 final class CachedSong {
-    var trackId: Int
+    
+    var trackId: Int?
     var collectionId: Int
     var trackName: String?
     var artistName: String
@@ -18,26 +19,13 @@ final class CachedSong {
     var collectionName: String
     var artworkUrl100: URL
 
-    init(from media: ITunesMedia) {
-        self.trackId = media.trackId ?? 0
-        self.collectionId = media.collectionId
-        self.trackName = media.trackName
-        self.artistName = media.artistName
-        self.previewUrl = media.previewUrl
-        self.collectionName = media.collectionName
-        self.artworkUrl100 = media.artworkUrl100
-    }
-
-    var asITunesMedia: ITunesMedia {
-        ITunesMedia(
-            wrapperType: .track,
-            trackId: trackId == 0 ? nil : trackId,
-            collectionId: collectionId,
-            trackName: trackName,
-            artistName: artistName,
-            previewUrl: previewUrl,
-            collectionName: collectionName,
-            artworkUrl100: artworkUrl100
-        )
+    init(trackId: Int, collectionId: Int, trackName: String? = nil, artistName: String, previewUrl: URL? = nil, collectionName: String, artworkUrl100: URL) {
+        self.trackId = trackId
+        self.collectionId = collectionId
+        self.trackName = trackName
+        self.artistName = artistName
+        self.previewUrl = previewUrl
+        self.collectionName = collectionName
+        self.artworkUrl100 = artworkUrl100
     }
 }

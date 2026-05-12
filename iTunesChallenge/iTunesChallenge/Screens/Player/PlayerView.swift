@@ -10,7 +10,7 @@ import SwiftData
 
 struct PlayerView: View {
     
-    let song: ITunesMedia
+    let song: PlayableMedia
     @Binding var path: NavigationPath
     @State private var viewModel = PlayerViewModel()
     @State var showActionSheet = false
@@ -103,7 +103,7 @@ fileprivate struct PlaybackControlsView: View {
 
 #Preview {
     NavigationStack {
-        PlayerView(song: .mock, path: .constant(NavigationPath()))
+        PlayerView(song: PlayableMedia.mock, path: .constant(NavigationPath()))
     }
 }
 

@@ -10,7 +10,7 @@ import Foundation
 @Observable
 final class SongsViewModel {
     
-    var songs: [ITunesMedia] = []
+    var songs: [PlayableMedia] = []
     var isLoading = false
     var error: Error?
     
@@ -37,7 +37,7 @@ final class SongsViewModel {
         
         do {
             let response = try await itunesService.fetchSongs(query: query)
-            songs = response.results
+            songs = response.results.map(\.asPlayableMedia)
         } catch {
             if Task.isCancelled { return }
             self.error = error

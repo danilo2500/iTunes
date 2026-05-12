@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum AppDestination: Hashable {
+    case player(PlayableMedia)
+    case album(collectionID: Int)
+}
+
 struct AppNavigationView: View {
     @State private var path = NavigationPath()
     @State private var showSplash = true
@@ -15,11 +20,13 @@ struct AppNavigationView: View {
             } else {
                 NavigationStack(path: $path) {
                     SongsView(path: $path)
-                        .navigationDestination(for: ITunesMedia.self) { song in
-                            PlayerView(song: song, path: $path)
-                        }
-                        .navigationDestination(for: Int.self) { id in
-                            AlbumView(collectionID: id, path: $path)
+                        .navigationDestination(for: AppDestination.self) { destination in
+                            switch destination {
+                            case .player(let item):
+                                PlayerView(song: item, path: $path)
+                            case .album(let id):
+                                AlbumView(collectionID: id, path: $path)
+                            }
                         }
                 }
                 .transition(.blurReplace)

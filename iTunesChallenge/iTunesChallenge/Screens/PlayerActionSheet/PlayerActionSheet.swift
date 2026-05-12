@@ -21,7 +21,7 @@ struct PlayerActionSheet: View {
             List {
                 Button("View album", systemImage: "music.note.square.stack") {
                     dismiss()
-                    path.append(collectionId)
+                    path.append(AppDestination.album(collectionID: collectionId))
                 }
                 .foregroundStyle(Color(.label))
                 .listRowBackground(Color.clear)

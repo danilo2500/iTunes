@@ -14,8 +14,11 @@ struct iTunesSearchResponse: Decodable {
 
 struct ITunesMedia: Decodable, Hashable {
     
-    let wrapperType: WrapperType?
+    var displayName: String {
+        trackName ?? collectionName
+    }
     
+    let wrapperType: WrapperType?
     let trackId: Int?
     let collectionId: Int
     let trackName: String?
@@ -24,9 +27,6 @@ struct ITunesMedia: Decodable, Hashable {
     let collectionName: String
     let artworkUrl100: URL
     
-    var displayName: String {
-        trackName ?? collectionName
-    }
 
     static let mock = ITunesMedia(
         wrapperType: .track,

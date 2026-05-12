@@ -20,7 +20,7 @@ struct AlbumView: View {
                 ForEach(viewModel.songs, id: \.self) { song in
                     Button {
                         path.removeLast(path.count)
-                        path.append(song)
+                        path.append(AppDestination.player(song))
                     } label: {
                         Label {
                             Text(song.displayName)
@@ -92,9 +92,9 @@ import Foundation
 @Observable
 final class AlbumViewModel {
     
-    var songs: [ITunesMedia] = []
-    var album: ITunesMedia? {
-        songs.first { $0.wrapperType == .collection }
+    var songs: [PlayableMedia] = []
+    var album: PlayableMedia? {
+        songs.first
     }
     var isLoading = false
     var error: Error?
@@ -117,7 +117,7 @@ final class AlbumViewModel {
         
         do {
             let response = try await itunesService.fetchCollection(id: collectionID)
-            songs = response.results
+            songs = response.results.map(\.asPlayableMedia)
         } catch {
             print(error)
             self.error = error
