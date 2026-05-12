@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import Network
 import SwiftData
 
 @Observable
@@ -33,14 +34,29 @@ class PlayerViewModel {
         }
     }
     var previewURL: URL?
-    
+    var isOnline = true
+    var isPlaybackControlsDisabled: Bool {
+        !isOnline && cachedLocalURL == nil
+    }
+    private var cachedLocalURL: URL?
+    private let pathMonitor = NWPathMonitor()
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var endObserver: Any?
     private var isSeeking = false
+    private var audioCacheTask: Task<Void, Never>?
     
+    
+    init() {
+        pathMonitor.pathUpdateHandler = { [weak self] path in
+            self?.isOnline = path.status == .satisfied
+        }
+        pathMonitor.start(queue: .main)
+    }
     
     deinit {
+        audioCacheTask?.cancel()
+        pathMonitor.cancel()
         if let observer = timeObserver {
             player?.removeTimeObserver(observer)
         }
@@ -52,9 +68,11 @@ class PlayerViewModel {
     
     func load(url: URL?) {
         self.previewURL = url
+        
+        cacheRemoteAudioIfNeeded()
     }
 
-    func saveAsRecent(song: PlayableMedia, modelContext: ModelContext) {
+    func persistSongMetadata(_ song: PlayableMedia, modelContext: ModelContext) {
         let cachedSongs = (try? modelContext.fetch(FetchDescriptor<CachedSong>())) ?? []
         if let trackId = song.trackId {
             if cachedSongs.contains(where: { $0.trackId == trackId }) { return }
@@ -62,6 +80,7 @@ class PlayerViewModel {
         let cachedSong = CachedSong(
             trackId: song.trackId ?? song.collectionId,
             collectionId: song.collectionId,
+            trackName: song.trackName,
             artistName: song.artistName,
             previewUrl: song.previewUrl,
             collectionName: song.collectionName,
@@ -72,7 +91,7 @@ class PlayerViewModel {
     }
     
     func play() {
-        guard let url = previewURL else {
+        guard let url = cachedLocalURL ?? previewURL else {
             debugPrint("URL not loaded or nil")
             return
         }
@@ -132,6 +151,16 @@ class PlayerViewModel {
             } else {
                 isPlaying = false
             }
+        }
+    }
+    
+    private func cacheRemoteAudioIfNeeded() {
+        audioCacheTask?.cancel()
+        guard let previewURL else { return }
+        cachedLocalURL = AudioCacheManager.shared.localURL(for: previewURL)
+        guard cachedLocalURL == nil, isOnline else { return }
+        audioCacheTask = Task {
+            cachedLocalURL = try? await AudioCacheManager.shared.cacheAudio(from: previewURL)
         }
     }
 }

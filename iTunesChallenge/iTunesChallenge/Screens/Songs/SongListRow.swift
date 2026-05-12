@@ -22,25 +22,28 @@ struct SongListRow: View {
                     .clipShape(.rect(cornerRadius: 8))
             }
             .frame(width: 52, height: 52)
-            LabeledContent {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
-                .popover(isPresented: .constant(false)) {
-                    NavigationLink("View Album") {
-                        EmptyView()
-                    }
-                    .padding()
-                    .presentationCompactAdaptation(.popover)
-                }
-            } label: {
+            
+            VStack(alignment: .leading) {
                 Text(trackName)
                     .font(.callout)
                 Text(artistName)
                     .font(.caption)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
+            .lineLimit(1)
+            Button {
+                
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+            .popover(isPresented: .constant(false)) {
+                NavigationLink("View Album") {
+                    EmptyView()
+                }
+                .padding()
+                .presentationCompactAdaptation(.popover)
+            }
+            
         }
         .tint(Color(.secondaryLabel))
     }
@@ -48,5 +51,5 @@ struct SongListRow: View {
 
 #Preview {
     let song = ITunesMedia.mock
-    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100)
+    SongListRow(trackName: song.displayName + "1231231231dkls k askdkas d lkas dk", artistName: song.artistName, artworkUrl: song.artworkUrl100)
 }

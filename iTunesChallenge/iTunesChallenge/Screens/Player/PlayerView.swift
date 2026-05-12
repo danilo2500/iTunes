@@ -29,17 +29,16 @@ struct PlayerView: View {
             Spacer()
             VStack(spacing: 24) {
                 PlaybackHeader(trackName: song.displayName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
-                if viewModel.previewURL != nil {
-                    SliderView(progress: $viewModel.progress) { isEditing in
-                        viewModel.isScrubbing = isEditing
-                    } minimumValueLabel: {
-                        Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
-                    } maximumValueLabel: {
-                        Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
-                    }
-                    PlaybackControlsView(isPlaying: $viewModel.isPlaying)
+                SliderView(progress: $viewModel.progress) { isEditing in
+                    viewModel.isScrubbing = isEditing
+                } minimumValueLabel: {
+                    Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
+                } maximumValueLabel: {
+                    Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
                 }
+                PlaybackControlsView(isPlaying: $viewModel.isPlaying)
             }
+            .disabled(viewModel.isPlaybackControlsDisabled)
         }
         .padding()
         .navigationBarTitleDisplayMode(.inline)
@@ -48,7 +47,7 @@ struct PlayerView: View {
             viewModel.load(url: song.previewUrl)
         }
         .onDisappear {
-            viewModel.saveAsRecent(song: song, modelContext: modelContext)
+            viewModel.persistSongMetadata(song, modelContext: modelContext)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
