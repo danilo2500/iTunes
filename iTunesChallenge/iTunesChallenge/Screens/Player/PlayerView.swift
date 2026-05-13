@@ -10,17 +10,20 @@ import SwiftData
 
 struct PlayerView: View {
     
-    let song: PlayableMedia
     @Binding var path: NavigationPath
-    @State private var viewModel = PlayerViewModel()
+    @Environment(PlayerViewModel.self) private var viewModel
     @State var showActionSheet = false
     @State var showInspector = true
     @Environment(\.modelContext) private var modelContext
     
+    init(path: Binding<NavigationPath>) {
+        self._path = path
+    }
+    
     var body: some View {
         VStack {
             Spacer()
-            AppAsyncImage(url: song.artworkUrl100) { image in
+            AppAsyncImage(url: viewModel.currentSong.artworkUrl100) { image in
                 image
                     .resizable()
                     .scaledToFit()
@@ -29,26 +32,30 @@ struct PlayerView: View {
             }
             Spacer()
             VStack(spacing: 24) {
-                PlaybackHeader(trackName: song.displayName, artistName: song.artistName, isRepeating: $viewModel.isRepeating)
-                SliderView(progress: $viewModel.progress) { isEditing in
+                PlaybackHeader(trackName: viewModel.currentSong.displayName, artistName: viewModel.currentSong.artistName, isRepeating: Bindable(viewModel).isRepeating)
+                SliderView(progress: Bindable(viewModel).progress) { isEditing in
                     viewModel.isScrubbing = isEditing
                 } minimumValueLabel: {
                     Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
                 } maximumValueLabel: {
                     Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
                 }
-                PlaybackControlsView(isPlaying: $viewModel.isPlaying)
+                PlaybackControlsView(
+                    isPlaying: Bindable(viewModel).isPlaying,
+                    onPrevious: viewModel.returnToPreviousSong,
+                    onNext: viewModel.goToNextSong,
+                    isPreviousDisabled: !viewModel.hasPrevious,
+                    isNextDisabled: !viewModel.hasNext
+                )
             }
             .disabled(viewModel.isPlaybackControlsDisabled)
         }
         .padding()
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(song.artistName)
-        .onChange(of: song, initial: true) { _, newSong in
-            viewModel.load(url: newSong.previewUrl)
-        }
+        .navigationTitle(viewModel.currentSong.artistName)
         .onDisappear {
-            viewModel.persistSongMetadata(song, modelContext: modelContext)
+            viewModel.persistSongMetadata(viewModel.currentSong, modelContext: modelContext)
+            viewModel.stop()
         }
         .toolbar {
             let isIPad = UIDevice.current.userInterfaceIdiom == .pad
@@ -71,11 +78,16 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showActionSheet) {
-            PlayerActionSheet(trackName: song.displayName, artistName: song.artistName, collectionId: song.collectionId, path: $path)
+            PlayerActionSheet(path: $path)
         }
         .inspector(isPresented: $showInspector) {
-            AlbumView(collectionID: song.collectionId, showHeader: false, path: $path)
-                .inspectorColumnWidth(280)
+            AlbumView(
+                collectionID: viewModel.currentSong.collectionId,
+                showHeader: false,
+                isInspector: true,
+                path: $path
+            )
+            .inspectorColumnWidth(280)
         }
     }
 }
@@ -84,6 +96,10 @@ struct PlayerView: View {
 
 fileprivate struct PlaybackControlsView: View {
     @Binding var isPlaying: Bool
+    let onPrevious: (() -> Void)
+    let onNext: (() -> Void)
+    var isPreviousDisabled: Bool
+    var isNextDisabled: Bool
     
     var body: some View {
         
@@ -91,10 +107,11 @@ fileprivate struct PlaybackControlsView: View {
             Spacer()
             HStack(spacing: 28) {
                 Button {
-                    
+                    onPrevious()
                 } label: {
                     Image(systemName: "backward.end.alt.fill")
                 }
+                .disabled(isPreviousDisabled)
                 Button {
                     isPlaying.toggle()
                 } label: {
@@ -105,10 +122,11 @@ fileprivate struct PlaybackControlsView: View {
                         .glassEffect()
                 }
                 Button {
-                    
+                    onNext()
                 } label: {
                     Image(systemName: "forward.end.alt.fill")
                 }
+                .disabled(isNextDisabled)
             }
             .tint(Color(.label))
             Spacer()
@@ -118,7 +136,8 @@ fileprivate struct PlaybackControlsView: View {
 
 #Preview {
     NavigationStack {
-        PlayerView(song: PlayableMedia.mock, path: .constant(NavigationPath()))
+        PlayerView(path: .constant(NavigationPath()))
+            .environment(PlayerViewModel())
     }
 }
 

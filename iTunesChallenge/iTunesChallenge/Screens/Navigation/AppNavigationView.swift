@@ -1,13 +1,14 @@
 import SwiftUI
 
 enum AppDestination: Hashable {
-    case player(PlayableMedia)
+    case player
     case album(collectionID: Int)
 }
 
 struct AppNavigationView: View {
     @State private var path = NavigationPath()
     @State private var showSplash = true
+    @State private var playerViewModel = PlayerViewModel()
 
     var body: some View {
         Group {
@@ -22,14 +23,15 @@ struct AppNavigationView: View {
                     SongsView(path: $path)
                         .navigationDestination(for: AppDestination.self) { destination in
                             switch destination {
-                            case .player(let item):
-                                PlayerView(song: item, path: $path)
+                            case .player:
+                                PlayerView(path: $path)
                             case .album(let id):
-                                AlbumView(collectionID: id, showHeader: true, path: $path)
+                                AlbumView(collectionID: id, showHeader: true, isInspector: false, path: $path)
                             }
                         }
                 }
                 .transition(.blurReplace)
+                .environment(playerViewModel)
             }
         }
         .animation(.default, value: showSplash)

@@ -38,8 +38,36 @@ class PlayerViewModel {
     var isPlaybackControlsDisabled: Bool {
         (!isOnline && cachedLocalURL == nil) || previewURL == nil
     }
+    var albumSongs: [PlayableMedia] = []
+    var currentSong: PlayableMedia {
+        didSet {
+            load(url: currentSong.previewUrl)
+        }
+    }
+    
+    var hasPrevious: Bool {
+        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
+        return index > 0
+    }
+    
+    var hasNext: Bool {
+        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
+        return index < albumSongs.count - 1
+    }
+    
+    var previousSong: PlayableMedia? {
+        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index > 0 else { return nil }
+        return albumSongs[index - 1]
+    }
+    
+    var nextSong: PlayableMedia? {
+        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index < albumSongs.count - 1 else { return nil }
+        return albumSongs[index + 1]
+    }
+    
     private var cachedLocalURL: URL?
     private let pathMonitor = NWPathMonitor()
+    private let itunesService: ItunesServiceProtocol
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var endObserver: Any?
@@ -47,11 +75,34 @@ class PlayerViewModel {
     private var audioCacheTask: Task<Void, Never>?
     
     
-    init() {
+    func goToNextSong() {
+        if let nextSong {
+            currentSong = nextSong
+        }
+        
+    }
+    
+    func returnToPreviousSong() {
+        if let previousSong {
+            currentSong = previousSong
+        }
+    }
+    
+    init(itunesService: ItunesServiceProtocol = ItunesService()) {
+        self.itunesService = itunesService
+        self.currentSong = PlayableMedia.mock
         pathMonitor.pathUpdateHandler = { [weak self] path in
             self?.isOnline = path.status == .satisfied
         }
         pathMonitor.start(queue: .main)
+    }
+    
+    func configure(with song: PlayableMedia, albumSongs: [PlayableMedia] = []) {
+        self.albumSongs = albumSongs
+        currentSong = song
+        if albumSongs.isEmpty {
+            Task { await fetchAlbumSongs(collectionId: song.collectionId) }
+        }
     }
     
     deinit {
@@ -66,7 +117,8 @@ class PlayerViewModel {
         player?.pause()
     }
     
-    func load(url: URL?) {
+    private func load(url: URL?) {
+        print(#function)
         stop()
         progress = 0
         self.previewURL = url
@@ -77,7 +129,18 @@ class PlayerViewModel {
             play()
         }
     }
-
+    
+    private func fetchAlbumSongs(collectionId: Int) async {
+        do {
+            let response = try await itunesService.fetchCollection(id: collectionId)
+            albumSongs = response.results
+                .filter({ $0.wrapperType == .track })
+                .map(\.asPlayableMedia)
+        } catch {
+            print(error)
+        }
+    }
+    
     func persistSongMetadata(_ song: PlayableMedia, modelContext: ModelContext) {
         let cachedSongs = (try? modelContext.fetch(FetchDescriptor<CachedSong>())) ?? []
         if let trackId = song.trackId {
@@ -90,7 +153,9 @@ class PlayerViewModel {
             artistName: song.artistName,
             previewUrl: song.previewUrl,
             collectionName: song.collectionName,
-            artworkUrl100: song.artworkUrl100
+            artworkUrl100: song.artworkUrl100,
+            trackNumber: song.trackNumber,
+            trackCount: song.trackCount
         )
         modelContext.insert(cachedSong)
         try? modelContext.save()

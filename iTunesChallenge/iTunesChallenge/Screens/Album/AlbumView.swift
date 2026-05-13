@@ -11,16 +11,22 @@ struct AlbumView: View {
     
     let collectionID: Int
     let showHeader: Bool
+    let isInspector: Bool
+
     @Binding var path: NavigationPath
-    @State var viewModel = AlbumViewModel()
+    @Environment(PlayerViewModel.self) private var playerViewModel
+    @State var albumViewModel = AlbumViewModel()
     
     var body: some View {
         List {
             Section {
-                ForEach(viewModel.songs, id: \.self) { song in
+                ForEach(albumViewModel.songs, id: \.self) { song in
                     Button {
-                        path.removeLast(path.count)
-                        path.append(AppDestination.player(song))
+                        playerViewModel.configure(with: song, albumSongs: albumViewModel.songs)
+                        if !isInspector {
+                            path.removeLast(path.count)
+                            path.append(AppDestination.player)
+                        }
                     } label: {
                         Label {
                             Text(song.displayName)
@@ -40,7 +46,7 @@ struct AlbumView: View {
                 }
             } header: {
                 if showHeader {
-                    if let album = viewModel.album {
+                    if let album = albumViewModel.album {
                         VStack {
                             AppAsyncImage(url: album.artworkUrl100) { image in
                                 image
@@ -62,31 +68,32 @@ struct AlbumView: View {
         }
         .tint(Color(.label))
         .overlay {
-            if viewModel.isLoading {
+            if albumViewModel.isLoading {
                 ProgressView()
                     .controlSize(.extraLarge)
-            } else if let error = viewModel.error {
+            } else if let error = albumViewModel.error {
                 ContentUnavailableView {
                     Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
                 } actions: {
                     Button("Retry") {
                         Task {
-                            await viewModel.fetchSongs(collectionID: collectionID)
+                            await albumViewModel.fetchSongs(collectionID: collectionID)
                         }
                     }
                 }
-            } else if viewModel.songs.isEmpty {
+            } else if albumViewModel.songs.isEmpty {
                 ContentUnavailableView("No Songs Found", systemImage: "music.note.slash")
             }
         }
         .task {
-            await viewModel.fetchSongs(collectionID: collectionID)
+            await albumViewModel.fetchSongs(collectionID: collectionID)
         }
     }
 }
 
 #Preview {
-    AlbumView(collectionID: 617154241, showHeader: true, path: .constant(NavigationPath()))
+    AlbumView(collectionID: 617154241, showHeader: true, isInspector: false, path: .constant(NavigationPath()))
+        .environment(PlayerViewModel())
 }
 
 import Foundation

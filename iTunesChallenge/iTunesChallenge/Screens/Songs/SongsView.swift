@@ -11,6 +11,7 @@ import SwiftData
 struct SongsView: View {
     
     @State var viewModel = SongsViewModel()
+    @Environment(PlayerViewModel.self) private var playerViewModel
     
     @State var searchText = ""
     @Binding var path: NavigationPath
@@ -21,7 +22,8 @@ struct SongsView: View {
         List {
             ForEach(viewModel.songs, id: \.self.trackId) { song in
                 Button {
-                    path.append(AppDestination.player(song))
+                    playerViewModel.configure(with: song)
+                    path.append(AppDestination.player)
                 } label: {
                     SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
                 }
@@ -32,7 +34,8 @@ struct SongsView: View {
                 Section("Recently Played") {
                     ForEach(cachedSongs, id: \.self) { song in
                         Button {
-                            path.append(AppDestination.player(song.asPlayableMedia))
+                            playerViewModel.configure(with: song.asPlayableMedia)
+                            path.append(AppDestination.player)
                         } label: {
                             SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
                         }
@@ -74,4 +77,5 @@ struct SongsView: View {
 
 #Preview {
     SongsView(path: .constant(NavigationPath()))
+        .environment(PlayerViewModel())
 }
