@@ -6,11 +6,13 @@ enum MockBehavior {
     case failure(Error, delay: UInt64 = 0)
 }
 
+@MainActor
 final class MockItunesService: ItunesServiceProtocol {
 
     private let behavior: MockBehavior
     private(set) var fetchSongsCallCount = 0
     private(set) var fetchCollectionCallCount = 0
+    var fetchCollectionResult: Result<iTunesSearchResponse, Error> = .success(.mock)
 
     init(behavior: MockBehavior = .success) {
         self.behavior = behavior
@@ -29,7 +31,7 @@ final class MockItunesService: ItunesServiceProtocol {
 
     func fetchCollection(id: Int) async throws -> iTunesSearchResponse {
         fetchCollectionCallCount += 1
-        return .mock
+        return try fetchCollectionResult.get()
     }
 }
 
