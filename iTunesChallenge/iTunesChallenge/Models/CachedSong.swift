@@ -18,8 +18,10 @@ final class CachedSong {
     var previewUrl: URL?
     var collectionName: String
     var artworkUrl100: URL
+    var trackNumber: Int?
+    var trackCount: Int
 
-    init(trackId: Int, collectionId: Int, trackName: String? = nil, artistName: String, previewUrl: URL? = nil, collectionName: String, artworkUrl100: URL) {
+    init(trackId: Int? = nil, collectionId: Int, trackName: String? = nil, artistName: String, previewUrl: URL? = nil, collectionName: String, artworkUrl100: URL, trackNumber: Int? = nil, trackCount: Int) {
         self.trackId = trackId
         self.collectionId = collectionId
         self.trackName = trackName
@@ -27,5 +29,7 @@ final class CachedSong {
         self.previewUrl = previewUrl
         self.collectionName = collectionName
         self.artworkUrl100 = artworkUrl100
+        self.trackNumber = trackNumber
+        self.trackCount = trackCount
     }
 }
