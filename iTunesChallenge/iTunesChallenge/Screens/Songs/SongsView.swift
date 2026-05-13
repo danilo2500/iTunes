@@ -55,7 +55,7 @@ struct SongsView: View {
                 } actions: {
                     Button("Retry") {
                         Task {
-                            await viewModel.search(query: viewModel.searchText)
+                            await viewModel.searchDebounced()
                         }
                     }
                 }

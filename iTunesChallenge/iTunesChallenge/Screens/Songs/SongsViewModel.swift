@@ -36,9 +36,15 @@ final class SongsViewModel {
     }
     
     var viewState: ViewState {
-        if isLoading { return .loading }
-        if let error { return .error(error.localizedDescription) }
-        if !songs.isEmpty || !cachedSongs.isEmpty { return .loaded }
+        if isLoading {
+            return .loading
+        }
+        if let error {
+            return .error(error.localizedDescription)
+        }
+        if !songs.isEmpty || !cachedSongs.isEmpty {
+            return .loaded
+        }
         return .idle
     }
     
@@ -48,7 +54,13 @@ final class SongsViewModel {
         cachedSongs = songs
     }
     
-    func search(query: String) async {
+    func searchDebounced() async {
+        try? await Task.sleep(for: .milliseconds(500))
+        guard !Task.isCancelled else { return }
+        await search(query: searchText)
+    }
+    
+    private func search(query: String) async {
         guard !query.isEmpty else {
             songs.removeAll()
             return
@@ -64,11 +76,5 @@ final class SongsViewModel {
             if Task.isCancelled { return }
             self.error = error
         }
-    }
-    
-    func searchDebounced() async {
-        try? await Task.sleep(for: .milliseconds(500))
-        guard !Task.isCancelled else { return }
-        await search(query: searchText)
     }
 }
