@@ -29,6 +29,9 @@ struct AppNavigationView: View {
                                 AlbumView(collectionID: id, showHeader: true, isInspector: false, path: $path)
                             }
                         }
+                        .safeAreaBar(edge: .bottom) {
+                            MiniPlayerView()
+                        }
                 }
                 .transition(.blurReplace)
                 .environment(playerViewModel)
@@ -37,3 +40,8 @@ struct AppNavigationView: View {
         .animation(.default, value: showSplash)
     }
 }
+
+#Preview {
+    AppNavigationView()
+}
+

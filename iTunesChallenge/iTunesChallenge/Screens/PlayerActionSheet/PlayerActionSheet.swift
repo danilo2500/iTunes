@@ -18,18 +18,20 @@ struct PlayerActionSheet: View {
             List {
                 Button("View album", systemImage: "music.note.square.stack") {
                     dismiss()
-                    path.append(AppDestination.album(collectionID: playerViewModel.currentSong.collectionId))
+                    if let collectionId = playerViewModel.currentSong?.collectionId {
+                        path.append(AppDestination.album(collectionID: collectionId))
+                    }
                 }
                 .foregroundStyle(Color(.label))
                 .listRowBackground(Color.clear)
             }
             .toolbar {
                 ToolbarItem(placement: .title) {
-                    Text(playerViewModel.currentSong.displayName)
+                    Text(playerViewModel.currentSong?.displayName ?? "")
                         .font(.headline)
                 }
                 ToolbarItem(placement: .subtitle) {
-                    Text(playerViewModel.currentSong.artistName)
+                    Text(playerViewModel.currentSong?.artistName ?? "")
                         .font(.footnote)
                 }
             }

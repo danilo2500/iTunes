@@ -24,8 +24,7 @@ struct AlbumView: View {
                     Button {
                         playerViewModel.configure(with: song, albumSongs: albumViewModel.songs)
                         if !isInspector {
-                            path.removeLast(path.count)
-                            path.append(AppDestination.player)
+                            path.removeLast()
                         }
                     } label: {
                         Label {

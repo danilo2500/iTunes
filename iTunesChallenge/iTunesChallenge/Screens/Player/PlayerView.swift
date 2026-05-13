@@ -22,40 +22,37 @@ struct PlayerView: View {
     
     var body: some View {
         VStack {
-            Spacer()
-            AppAsyncImage(url: viewModel.currentSong.artworkUrl100) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(.rect(cornerRadius: 32))
-                    .frame(maxWidth: 264)
-            }
-            Spacer()
-            VStack(spacing: 24) {
-                PlaybackHeader(trackName: viewModel.currentSong.displayName, artistName: viewModel.currentSong.artistName, isRepeating: Bindable(viewModel).isRepeating)
-                SliderView(progress: Bindable(viewModel).progress) { isEditing in
-                    viewModel.isScrubbing = isEditing
-                } minimumValueLabel: {
-                    Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
-                } maximumValueLabel: {
-                    Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
+            if let song = viewModel.currentSong {
+                Spacer()
+                AppAsyncImage(url: song.artworkUrl100) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(.rect(cornerRadius: 32))
+                        .frame(maxWidth: 264)
                 }
-                PlaybackControlsView(
-                    isPlaying: Bindable(viewModel).isPlaying,
-                    onPrevious: viewModel.returnToPreviousSong,
-                    onNext: viewModel.goToNextSong,
-                    isPreviousDisabled: !viewModel.hasPrevious,
-                    isNextDisabled: !viewModel.hasNext
-                )
+                Spacer()
+                VStack(spacing: 24) {
+                    PlaybackHeader(trackName: song.displayName, artistName: song.artistName, isRepeating: Bindable(viewModel).isRepeating)
+                    SliderView(progress: Bindable(viewModel).progress) { isEditing in
+                        viewModel.isScrubbing = isEditing
+                    } minimumValueLabel: {
+                        Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
+                    } maximumValueLabel: {
+                        Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
+                    }
+                    PlaybackControlsView()
+                }
+                .disabled(viewModel.isPlaybackControlsDisabled)
             }
-            .disabled(viewModel.isPlaybackControlsDisabled)
         }
         .padding()
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(viewModel.currentSong.artistName)
+        .navigationTitle(viewModel.currentSong?.artistName ?? "")
         .onDisappear {
-            viewModel.persistSongMetadata(viewModel.currentSong, modelContext: modelContext)
-            viewModel.stop()
+            if let currentSong = viewModel.currentSong {
+                viewModel.persistSongMetadata(currentSong, modelContext: modelContext)
+            }
         }
         .toolbar {
             let isIPad = UIDevice.current.userInterfaceIdiom == .pad
@@ -82,7 +79,7 @@ struct PlayerView: View {
         }
         .inspector(isPresented: $showInspector) {
             AlbumView(
-                collectionID: viewModel.currentSong.collectionId,
+                collectionID: viewModel.currentSong?.collectionId ?? 0,
                 showHeader: false,
                 isInspector: true,
                 path: $path
@@ -94,12 +91,8 @@ struct PlayerView: View {
 
 
 
-fileprivate struct PlaybackControlsView: View {
-    @Binding var isPlaying: Bool
-    let onPrevious: (() -> Void)
-    let onNext: (() -> Void)
-    var isPreviousDisabled: Bool
-    var isNextDisabled: Bool
+struct PlaybackControlsView: View {
+    @Environment(PlayerViewModel.self) private var playerViewModel
     
     var body: some View {
         
@@ -107,26 +100,26 @@ fileprivate struct PlaybackControlsView: View {
             Spacer()
             HStack(spacing: 28) {
                 Button {
-                    onPrevious()
+                    playerViewModel.returnToPreviousSong()
                 } label: {
                     Image(systemName: "backward.end.alt.fill")
                 }
-                .disabled(isPreviousDisabled)
+                .disabled(!playerViewModel.hasPrevious)
                 Button {
-                    isPlaying.toggle()
+                    playerViewModel.isPlaying.toggle()
                 } label: {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    Image(systemName: playerViewModel.isPlaying ? "pause.fill" : "play.fill")
                         .font(.title)
                         .padding()
                         .contentTransition(.symbolEffect(.replace))
                         .glassEffect()
                 }
                 Button {
-                    onNext()
+                    playerViewModel.goToNextSong()
                 } label: {
                     Image(systemName: "forward.end.alt.fill")
                 }
-                .disabled(isNextDisabled)
+                .disabled(!playerViewModel.hasNext)
             }
             .tint(Color(.label))
             Spacer()
@@ -140,8 +133,6 @@ fileprivate struct PlaybackControlsView: View {
             .environment(PlayerViewModel())
     }
 }
-
-import SwiftUI
 
 fileprivate struct PlaybackHeader: View {
     let trackName: String

@@ -36,32 +36,33 @@ class PlayerViewModel {
     var previewURL: URL?
     var isOnline = true
     var isPlaybackControlsDisabled: Bool {
-        (!isOnline && cachedLocalURL == nil) || previewURL == nil
+        currentSong == nil || (!isOnline && cachedLocalURL == nil) || previewURL == nil
     }
     var albumSongs: [PlayableMedia] = []
-    var currentSong: PlayableMedia {
+    var currentSong: PlayableMedia? = nil {
         didSet {
+            guard let currentSong else { return }
             load(url: currentSong.previewUrl)
         }
     }
     
     var hasPrevious: Bool {
-        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
+        guard let currentSong, let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
         return index > 0
     }
     
     var hasNext: Bool {
-        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
+        guard let currentSong, let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }) else { return false }
         return index < albumSongs.count - 1
     }
     
     var previousSong: PlayableMedia? {
-        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index > 0 else { return nil }
+        guard let currentSong, let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index > 0 else { return nil }
         return albumSongs[index - 1]
     }
     
     var nextSong: PlayableMedia? {
-        guard let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index < albumSongs.count - 1 else { return nil }
+        guard let currentSong, let index = albumSongs.firstIndex(where: { $0.trackId == currentSong.trackId }), index < albumSongs.count - 1 else { return nil }
         return albumSongs[index + 1]
     }
     
@@ -90,7 +91,6 @@ class PlayerViewModel {
     
     init(itunesService: ItunesServiceProtocol = ItunesService()) {
         self.itunesService = itunesService
-        self.currentSong = PlayableMedia.mock
         pathMonitor.pathUpdateHandler = { [weak self] path in
             self?.isOnline = path.status == .satisfied
         }
@@ -118,7 +118,6 @@ class PlayerViewModel {
     }
     
     private func load(url: URL?) {
-        print(#function)
         stop()
         progress = 0
         self.previewURL = url
