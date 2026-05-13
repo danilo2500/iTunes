@@ -13,7 +13,6 @@ struct SplashView: View {
     
     var body: some View {
         ZStack {
-            GradientBackgroundView()
             let color1: Color = showLogo ? .black : .brand
             let color2: Color = showLogo ? .brand : .black
             LinearGradient(colors: [color1, color2], startPoint: .topTrailing, endPoint: .bottomLeading)
