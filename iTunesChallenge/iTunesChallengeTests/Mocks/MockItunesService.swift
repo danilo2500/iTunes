@@ -22,7 +22,7 @@ final class MockItunesService: ItunesServiceProtocol {
         fetchSongsCallCount += 1
         switch behavior {
         case .success:
-            return .mock
+            return try fetchCollectionResult.get()
         case .failure(let error, let delay):
             try? await Task.sleep(for: .nanoseconds(delay))
             throw error
@@ -31,7 +31,14 @@ final class MockItunesService: ItunesServiceProtocol {
 
     func fetchCollection(id: Int) async throws -> iTunesSearchResponse {
         fetchCollectionCallCount += 1
-        return try fetchCollectionResult.get()
+        
+        switch behavior {
+        case .success:
+            return try fetchCollectionResult.get()
+        case .failure(let error, let delay):
+            try? await Task.sleep(for: .nanoseconds(delay))
+            throw error
+        }
     }
 }
 

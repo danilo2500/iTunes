@@ -29,6 +29,17 @@
 		302861B72FAF7D5800A6BB66 /* iTunesChallengeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iTunesChallengeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		305EBFE12FB526B10020102C /* Exceptions for "iTunesChallengeUITests" folder in "iTunesChallengeUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				iTunesChallengeUITests.swift,
+				iTunesChallengeUITestsLaunchTests.swift,
+			);
+			target = 302861B62FAF7D5800A6BB66 /* iTunesChallengeUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		302861A02FAF7D5600A6BB66 /* iTunesChallenge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -42,6 +53,9 @@
 		};
 		302861BA2FAF7D5800A6BB66 /* iTunesChallengeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				305EBFE12FB526B10020102C /* Exceptions for "iTunesChallengeUITests" folder in "iTunesChallengeUITests" target */,
+			);
 			path = iTunesChallengeUITests;
 			sourceTree = "<group>";
 		};

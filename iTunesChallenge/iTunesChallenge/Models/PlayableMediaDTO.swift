@@ -34,6 +34,30 @@ struct PlayableMedia: Hashable {
         trackNumber: 8,
         trackCount: 13
     )
+
+    static let mock2 = PlayableMedia(
+        trackId: 1,
+        collectionId: 1,
+        trackName: "Song A",
+        artistName: "Artist",
+        artworkUrl100: URL(string: "https://example.com/1.jpg")!,
+        previewUrl: URL(string: "https://example.com/1.m4a")!,
+        collectionName: "Collection",
+        trackNumber: 1,
+        trackCount: 3
+    )
+
+    static let mock3 = PlayableMedia(
+        trackId: 2,
+        collectionId: 1,
+        trackName: "Song B",
+        artistName: "Artist",
+        artworkUrl100: URL(string: "https://example.com/2.jpg")!,
+        previewUrl: URL(string: "https://example.com/2.m4a")!,
+        collectionName: "Collection",
+        trackNumber: 2,
+        trackCount: 3
+    )
 }
 
 extension ITunesMedia {

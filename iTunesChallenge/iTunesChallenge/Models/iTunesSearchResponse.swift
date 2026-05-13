@@ -46,6 +46,45 @@ struct ITunesMedia: Decodable, Hashable {
         trackNumber: 8,
         trackCount: 13
     )
+
+    static let mock2 = ITunesMedia(
+        wrapperType: .track,
+        trackId: 1,
+        collectionId: 1,
+        trackName: "Song A",
+        artistName: "Artist",
+        previewUrl: URL(string: "https://example.com/1.m4a")!,
+        collectionName: "Album",
+        artworkUrl100: URL(string: "https://example.com/1.jpg")!,
+        trackNumber: 1,
+        trackCount: 10
+    )
+
+    static let mock3 = ITunesMedia(
+        wrapperType: .track,
+        trackId: 2,
+        collectionId: 1,
+        trackName: "Song B",
+        artistName: "Artist",
+        previewUrl: URL(string: "https://example.com/2.m4a")!,
+        collectionName: "Album",
+        artworkUrl100: URL(string: "https://example.com/2.jpg")!,
+        trackNumber: 2,
+        trackCount: 10
+    )
+
+    static let mock4 = ITunesMedia(
+        wrapperType: .collection,
+        trackId: nil,
+        collectionId: 1,
+        trackName: nil,
+        artistName: "Artist",
+        previewUrl: nil,
+        collectionName: "Album",
+        artworkUrl100: URL(string: "https://example.com/cover.jpg")!,
+        trackNumber: nil,
+        trackCount: 10
+    )
 }
 
 enum WrapperType: String, Decodable {
