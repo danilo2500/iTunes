@@ -10,6 +10,11 @@ import Foundation
 struct iTunesSearchResponse: Decodable {
     let resultCount: Int
     let results: [ITunesMedia]
+
+    static let mock = iTunesSearchResponse(
+        resultCount: 1,
+        results: [.mock]
+    )
 }
 
 struct ITunesMedia: Decodable, Hashable {

@@ -31,5 +31,4 @@ final class CachedSong {
         self.artworkUrl100 = artworkUrl100
         self.trackNumber = trackNumber
         self.trackCount = trackCount
-    }
-}
+    }}

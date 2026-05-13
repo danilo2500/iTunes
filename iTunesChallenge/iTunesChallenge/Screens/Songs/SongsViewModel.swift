@@ -8,13 +8,14 @@
 import Foundation
 
 @Observable
+@MainActor
 final class SongsViewModel {
     
     var songs: [PlayableMedia] = []
-    var isLoading = false
-    var error: Error?
+    private(set) var isLoading = false
+    private(set) var error: Error?
     var searchText = ""
-    var cachedSongs: [CachedSong] = []
+    var cachedSongs: [PlayableMedia] = []
     
     //MARK: - Private Variables
     
@@ -26,16 +27,7 @@ final class SongsViewModel {
         self.itunesService = itunesService
     }
     
-    //MARK: - View State
-    
-    enum ViewState: Hashable {
-        case idle
-        case loading
-        case loaded
-        case error(String)
-    }
-    
-    var viewState: ViewState {
+    var viewState: SongsViewState {
         if isLoading {
             return .loading
         }
@@ -47,13 +39,7 @@ final class SongsViewModel {
         }
         return .idle
     }
-    
-    //MARK: - Functions
-    
-    func updateCachedSongs(_ songs: [CachedSong]) {
-        cachedSongs = songs
-    }
-    
+
     func searchDebounced() async {
         try? await Task.sleep(for: .milliseconds(500))
         guard !Task.isCancelled else { return }
@@ -77,4 +63,14 @@ final class SongsViewModel {
             self.error = error
         }
     }
+}
+
+
+//MARK: - View State
+
+enum SongsViewState: Hashable {
+    case idle
+    case loading
+    case loaded
+    case error(String)
 }

@@ -10,6 +10,7 @@ import Network
 import SwiftData
 
 @Observable
+@MainActor
 class PlayerViewModel {
     
     var progress: Double = 0
@@ -92,7 +93,10 @@ class PlayerViewModel {
     init(itunesService: ItunesServiceProtocol = ItunesService()) {
         self.itunesService = itunesService
         pathMonitor.pathUpdateHandler = { [weak self] path in
-            self?.isOnline = path.status == .satisfied
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.isOnline = path.status == .satisfied
+            }
         }
         pathMonitor.start(queue: .main)
     }
@@ -106,15 +110,18 @@ class PlayerViewModel {
     }
     
     deinit {
-        audioCacheTask?.cancel()
-        pathMonitor.cancel()
-        if let observer = timeObserver {
-            player?.removeTimeObserver(observer)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            audioCacheTask?.cancel()
+            pathMonitor.cancel()
+            if let observer = timeObserver {
+                player?.removeTimeObserver(observer)
+            }
+            if let observer = endObserver {
+                NotificationCenter.default.removeObserver(observer)
+            }
+            player?.pause()
         }
-        if let observer = endObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-        player?.pause()
     }
     
     private func load(url: URL?) {
@@ -188,22 +195,27 @@ class PlayerViewModel {
         let time = CMTime(seconds: seconds, preferredTimescale: 600)
         isSeeking = true
         player?.seek(to: time) { _ in
-            self.progress = progress
-            self.isSeeking = false
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.progress = progress
+                self.isSeeking = false
+            }
         }
     }
     
     private func observeProgress() {
         let interval = CMTime(seconds: 0.1, preferredTimescale: 600)
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self = self else { return }
-            guard let duration = self.player?.currentItem?.duration.seconds,
-                  duration > 0 else { return }
-            
-            self.totalDuration = duration
-            
-            if !isScrubbing && !isSeeking {
-                self.progress = time.seconds / duration
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                guard let duration = self.player?.currentItem?.duration.seconds, 
+                      duration > 0 else { return }
+                
+                self.totalDuration = duration 
+                
+                if !isScrubbing && !isSeeking { 
+                    self.progress = time.seconds / duration 
+                }
             }
         }
     }
@@ -214,12 +226,15 @@ class PlayerViewModel {
             object: player?.currentItem,
             queue: .main
         ) { [weak self] _ in
-            guard let self else { return }
-            self.player?.seek(to: .zero)
-            if isRepeating {
-                self.player?.play()
-            } else {
-                isPlaying = false
+            
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.player?.seek(to: .zero)
+                if isRepeating { 
+                    self.player?.play() 
+                } else {
+                    isPlaying = false 
+                }
             }
         }
     }

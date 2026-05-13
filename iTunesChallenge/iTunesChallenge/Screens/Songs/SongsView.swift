@@ -70,7 +70,9 @@ struct SongsView: View {
         .task(id: viewModel.searchText) {
             await viewModel.searchDebounced()
         }
-        .onChange(of: cachedSongs, initial: true) { _, newValue in viewModel.updateCachedSongs(newValue) }
+        .onChange(of: cachedSongs, initial: true) { _, newValue in
+            viewModel.cachedSongs = newValue.map(\.asPlayableMedia)
+        }
     }
 }
 
