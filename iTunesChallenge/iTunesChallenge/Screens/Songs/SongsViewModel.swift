@@ -13,6 +13,8 @@ final class SongsViewModel {
     var songs: [PlayableMedia] = []
     var isLoading = false
     var error: Error?
+    var searchText = ""
+    var cachedSongs: [CachedSong] = []
     
     //MARK: - Private Variables
     
@@ -24,7 +26,27 @@ final class SongsViewModel {
         self.itunesService = itunesService
     }
     
+    //MARK: - View State
+    
+    enum ViewState: Hashable {
+        case idle
+        case loading
+        case loaded
+        case error(String)
+    }
+    
+    var viewState: ViewState {
+        if isLoading { return .loading }
+        if let error { return .error(error.localizedDescription) }
+        if !songs.isEmpty || !cachedSongs.isEmpty { return .loaded }
+        return .idle
+    }
+    
     //MARK: - Functions
+    
+    func updateCachedSongs(_ songs: [CachedSong]) {
+        cachedSongs = songs
+    }
     
     func search(query: String) async {
         guard !query.isEmpty else {
@@ -43,7 +65,10 @@ final class SongsViewModel {
             self.error = error
         }
     }
+    
+    func searchDebounced() async {
+        try? await Task.sleep(for: .milliseconds(500))
+        guard !Task.isCancelled else { return }
+        await search(query: searchText)
+    }
 }
-
-
-

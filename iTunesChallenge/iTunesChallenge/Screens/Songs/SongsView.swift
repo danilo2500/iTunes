@@ -13,7 +13,6 @@ struct SongsView: View {
     @State var viewModel = SongsViewModel()
     @Environment(PlayerViewModel.self) private var playerViewModel
     
-    @State var searchText = ""
     @Binding var path: NavigationPath
     
     @Query var cachedSongs: [CachedSong]
@@ -46,30 +45,32 @@ struct SongsView: View {
             }
         }
         .overlay {
-            if viewModel.isLoading {
+            switch viewModel.viewState {
+            case .loading:
                 ProgressView()
                     .controlSize(.extraLarge)
-            } else if let error = viewModel.error {
+            case .error(let message):
                 ContentUnavailableView {
-                    Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
+                    Label(message, systemImage: "exclamationmark.triangle")
                 } actions: {
                     Button("Retry") {
                         Task {
-                            await viewModel.search(query: searchText)
+                            await viewModel.search(query: viewModel.searchText)
                         }
                     }
                 }
-            } else if (viewModel.songs + cachedSongs.map(\.asPlayableMedia)).isEmpty {
+            case .idle:
                 ContentUnavailableView("No Songs yet", systemImage: "music.note", description: Text("recent songs will appear here"))
+            case .loaded:
+                EmptyView()
             }
         }
         .navigationTitle("Songs")
-        .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search")
-        .task(id: searchText) {
-            try? await Task.sleep(for: .milliseconds(500))
-            if Task.isCancelled { return }
-            await viewModel.search(query: searchText)
+        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer, prompt: "Search")
+        .task(id: viewModel.searchText) {
+            await viewModel.searchDebounced()
         }
+        .onChange(of: cachedSongs, initial: true) { _, newValue in viewModel.updateCachedSongs(newValue) }
     }
 }
 
