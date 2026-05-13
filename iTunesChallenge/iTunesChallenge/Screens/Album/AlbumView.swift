@@ -27,18 +27,25 @@ struct AlbumView: View {
                             path.removeLast()
                         }
                     } label: {
-                        Label {
-                            Text(song.displayName)
-                            Text(song.artistName)
-                        } icon: {
-                            AppAsyncImage(url: song.artworkUrl100) { image in
-                                image
-                                    .frame(width: 44, height: 44)
-                                    .clipShape(.rect(cornerRadius: 8))
+                        HStack {
+                            Label {
+                                Text(song.displayName)
+                                Text(song.artistName)
+                            } icon: {
+                                AppAsyncImage(url: song.artworkUrl100) { image in
+                                    image
+                                        .frame(width: 44, height: 44)
+                                        .clipShape(.rect(cornerRadius: 8))
+                                }
+                            }
+                            .lineLimit(1)
+                            .labelReservedIconWidth(52)
+                            Spacer()
+                            if song.trackId == playerViewModel.currentSong?.trackId {
+                                Image(systemName: "lines.measurement.horizontal")
+                                    .symbolEffect(.variableColor.iterative.hideInactiveLayers.nonReversing, options: .repeat(.continuous))
                             }
                         }
-                        .lineLimit(1)
-                        .labelReservedIconWidth(52)
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
