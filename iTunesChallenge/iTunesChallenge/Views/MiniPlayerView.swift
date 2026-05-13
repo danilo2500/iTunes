@@ -16,6 +16,7 @@ struct MiniPlayerView: View {
         if let currentSong = playerViewModel.currentSong {
             LabeledContent {
                 PlaybackControlsView()
+                    .fixedSize()
             } label: {
                 HStack {
                     AppAsyncImage(url: currentSong.artworkUrl100) { image in

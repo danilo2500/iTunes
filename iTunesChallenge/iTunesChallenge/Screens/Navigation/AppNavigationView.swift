@@ -15,7 +15,7 @@ struct AppNavigationView: View {
             if showSplash {
                 SplashView()
                     .task {
-                        try? await Task.sleep(for: .seconds(1))
+//                        try? await Task.sleep(for: .seconds(1))
                         showSplash = false
                     }
             } else {
