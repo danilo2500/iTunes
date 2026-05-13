@@ -244,8 +244,9 @@ class PlayerViewModel {
         guard let previewURL else { return }
         cachedLocalURL = AudioCacheManager.shared.localURL(for: previewURL)
         guard cachedLocalURL == nil, isOnline else { return }
-        audioCacheTask = Task {
-            cachedLocalURL = try? await AudioCacheManager.shared.cacheAudio(from: previewURL)
+        audioCacheTask = Task { [weak self] in
+            guard let self else { return }
+            self.cachedLocalURL = try? await AudioCacheManager.shared.cacheAudio(from: previewURL)
         }
     }
 }

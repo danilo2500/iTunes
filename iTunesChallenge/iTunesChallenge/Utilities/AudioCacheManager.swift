@@ -14,6 +14,13 @@ actor AudioCacheManager {
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
     }
 
+    func cleanCache() {
+        activeDownloads.values.forEach { $0.cancel() }
+        activeDownloads.removeAll()
+        try? FileManager.default.removeItem(at: cacheDirectory)
+        try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+    }
+
     nonisolated func localURL(for remoteURL: URL) -> URL? {
         let destination = cacheDirectory.appendingPathComponent(filename(from: remoteURL))
         guard FileManager.default.fileExists(atPath: destination.path) else { return nil }

@@ -10,6 +10,7 @@ final class MockItunesService: ItunesServiceProtocol {
 
     private let behavior: MockBehavior
     private(set) var fetchSongsCallCount = 0
+    private(set) var fetchCollectionCallCount = 0
 
     init(behavior: MockBehavior = .success) {
         self.behavior = behavior
@@ -27,7 +28,8 @@ final class MockItunesService: ItunesServiceProtocol {
     }
 
     func fetchCollection(id: Int) async throws -> iTunesSearchResponse {
-        return .init(resultCount: 0, results: [])
+        fetchCollectionCallCount += 1
+        return .mock
     }
 }
 
