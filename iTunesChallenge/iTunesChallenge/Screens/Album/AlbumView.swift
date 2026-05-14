@@ -76,6 +76,9 @@ struct AlbumView: View {
                 }
             }
         }
+        .refreshable {
+            await albumViewModel.fetchSongs(collectionID: collectionID)
+        }
         .tint(Color(.label))
         .overlay {
             if albumViewModel.isLoading {

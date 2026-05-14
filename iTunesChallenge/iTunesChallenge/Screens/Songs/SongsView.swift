@@ -46,6 +46,9 @@ struct SongsView: View {
                 }
             }
         }
+        .refreshable {
+            await viewModel.searchDebounced()
+        }
         .overlay {
             switch viewModel.viewState {
             case .loading:
