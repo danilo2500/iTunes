@@ -62,7 +62,7 @@ Although API pagination was a requirement, the iTunes API does not actually supp
 
 Some Stack Overflow posts suggest otherwise, but in practice it is not possible.
 
-Simulating pagination would cause the app to display inconsistent or incorrect results, which could easily be interpreted as a bug by users.
+Simulating pagination would cause the app to display inconsistent or incorrect results, which could easily be interpreted as a bug
 
 Because of this, I chose not to implement fake pagination behavior.
 
