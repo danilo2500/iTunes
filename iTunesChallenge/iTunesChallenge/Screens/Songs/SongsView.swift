@@ -20,28 +20,12 @@ struct SongsView: View {
     var body: some View {
         List {
             ForEach(viewModel.songs, id: \.self.trackId) { song in
-                Button {
-                    playerViewModel.configure(with: song)
-                    path.append(AppDestination.player)
-                } label: {
-                    SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
-                }
-                .accessibilityLabel("Play \(song.displayName) by \(song.artistName)")
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                songRow(for: song)
             }
             if !cachedSongs.isEmpty {
                 Section("Recently Played") {
                     ForEach(cachedSongs, id: \.self) { song in
-                        Button {
-                            playerViewModel.configure(with: song.asPlayableMedia)
-                            path.append(AppDestination.player)
-                        } label: {
-                            SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
-                        }
-                        .accessibilityLabel("Play \(song.trackName ?? song.collectionName) by \(song.artistName)")
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                        songRow(for: song.asPlayableMedia)
                     }
                 }
             }
@@ -79,6 +63,18 @@ struct SongsView: View {
         .onChange(of: cachedSongs, initial: true) { _, newValue in
             viewModel.cachedSongs = newValue.map(\.asPlayableMedia)
         }
+    }
+
+    private func songRow(for media: PlayableMedia) -> some View {
+        Button {
+            playerViewModel.configure(with: media)
+            path.append(AppDestination.player)
+        } label: {
+            SongListRow(trackName: media.displayName, artistName: media.artistName, artworkUrl: media.artworkUrl100, collectionId: media.collectionId, path: $path)
+        }
+        .accessibilityLabel("Play \(media.displayName) by \(media.artistName)")
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 }
 
