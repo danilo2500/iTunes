@@ -16,6 +16,7 @@ struct SliderView<MaxMinLabel: View>: View {
     let totalFrameHeight: CGFloat = 24
     let thumbSize: CGFloat = 24
     let sliderHeight: CGFloat = 8
+    var totalDuration: TimeInterval = 0
     
     var onEditingChanged: (Bool) -> Void = { _ in }
     
@@ -32,11 +33,13 @@ struct SliderView<MaxMinLabel: View>: View {
                 }
                 .sliderThumbVisibility(.hidden)
                 .tint(.gray)
+                .accessibilityValue(accessibilityTimeText)
                 .overlay {
                     Circle()
                         .frame(width: thumbSize, height: thumbSize)
                         .position(x: offset, y: (totalFrameHeight + sliderHeight) / 2)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
             }
             .frame(height: totalFrameHeight)
@@ -48,6 +51,14 @@ struct SliderView<MaxMinLabel: View>: View {
             .opacity(0.7)
             .font(.footnote)
         }
+    }
+    
+    private var accessibilityTimeText: Text {
+        guard totalDuration > 0 else { return Text("") }
+        let current = progress * totalDuration
+        let currentFormatted = Duration.seconds(current).formatted(.units(allowed: [.minutes, .seconds], width: .wide))
+        let totalFormatted = Duration.seconds(totalDuration).formatted(.units(allowed: [.minutes, .seconds], width: .wide))
+        return Text("\(currentFormatted) of \(totalFormatted)")
     }
 }
 

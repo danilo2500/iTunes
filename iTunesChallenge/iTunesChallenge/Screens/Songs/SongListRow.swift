@@ -26,6 +26,7 @@ struct SongListRow: View {
                     .clipShape(.rect(cornerRadius: 8))
             }
             .frame(width: 52, height: 52)
+            .accessibilityHidden(true)
             
             VStack(alignment: .leading) {
                 Text(trackName)
@@ -36,11 +37,11 @@ struct SongListRow: View {
             }
             .lineLimit(1)
             Spacer()
-            Button {
+            Button("More actions for \(trackName)", systemImage: "ellipsis") {
                 showPopover = true
-            } label: {
-                Image(systemName: "ellipsis")
             }
+            .labelStyle(.iconOnly)
+            .frame(minWidth: 44, minHeight: 44)
             .popover(isPresented: $showPopover) {
                 Button("View Album") {
                     showPopover = false
@@ -51,6 +52,9 @@ struct SongListRow: View {
             }
         }
         .tint(Color(.secondaryLabel))
+        .accessibilityAction(named: "View Album") {
+            path.append(AppDestination.album(collectionID: collectionId))
+        }
     }
 }
 

@@ -25,6 +25,7 @@ struct MiniPlayerView: View {
                             .frame(width: 44, height: 44)
                             .clipShape(.rect(cornerRadius: 8))
                     }
+                    .accessibilityHidden(true)
                     VStack(alignment: .leading) {
                         Text(currentSong.displayName)
                             .font(.callout)

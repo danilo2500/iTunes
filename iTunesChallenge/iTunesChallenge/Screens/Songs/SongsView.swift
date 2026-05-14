@@ -26,6 +26,7 @@ struct SongsView: View {
                 } label: {
                     SongListRow(trackName: song.displayName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
                 }
+                .accessibilityLabel("Play \(song.displayName) by \(song.artistName)")
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }
@@ -38,6 +39,7 @@ struct SongsView: View {
                         } label: {
                             SongListRow(trackName: song.trackName ?? song.collectionName, artistName: song.artistName, artworkUrl: song.artworkUrl100, collectionId: song.collectionId, path: $path)
                         }
+                        .accessibilityLabel("Play \(song.trackName ?? song.collectionName) by \(song.artistName)")
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                     }
@@ -49,6 +51,7 @@ struct SongsView: View {
             case .loading:
                 ProgressView()
                     .controlSize(.extraLarge)
+                    .accessibilityLabel("Loading songs")
             case .error(let message):
                 ContentUnavailableView {
                     Label(message, systemImage: "exclamationmark.triangle")

@@ -32,11 +32,12 @@ struct AlbumView: View {
                                 Text(song.displayName)
                                 Text(song.artistName)
                             } icon: {
-                                AppAsyncImage(url: song.artworkUrl100) { image in
-                                    image
-                                        .frame(width: 44, height: 44)
-                                        .clipShape(.rect(cornerRadius: 8))
-                                }
+                            AppAsyncImage(url: song.artworkUrl100) { image in
+                                image
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(.rect(cornerRadius: 8))
+                            }
+                            .accessibilityHidden(true)
                             }
                             .lineLimit(1)
                             .labelReservedIconWidth(52)
@@ -44,9 +45,11 @@ struct AlbumView: View {
                             if song.trackId == playerViewModel.currentSong?.trackId {
                                 Image(systemName: "lines.measurement.horizontal")
                                     .symbolEffect(.variableColor.iterative.hideInactiveLayers.nonReversing, options: .repeat(.continuous))
+                                    .accessibilityLabel("Now Playing")
                             }
                         }
                     }
+                    .accessibilityLabel("Play \(song.displayName) by \(song.artistName)")
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                 }
@@ -60,6 +63,7 @@ struct AlbumView: View {
                                     .frame(width: 120, height: 120)
                                     .clipShape(.rect(cornerRadius: 20))
                             }
+                            .accessibilityHidden(true)
                             Text(album.collectionName)
                                 .font(.title3)
                             Text(album.artistName)
@@ -77,6 +81,7 @@ struct AlbumView: View {
             if albumViewModel.isLoading {
                 ProgressView()
                     .controlSize(.extraLarge)
+                    .accessibilityLabel("Loading album")
             } else if let error = albumViewModel.error {
                 ContentUnavailableView {
                     Label(error.localizedDescription, systemImage: "exclamationmark.triangle")

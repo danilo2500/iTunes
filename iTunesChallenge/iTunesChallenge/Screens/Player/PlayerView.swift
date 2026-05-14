@@ -31,15 +31,19 @@ struct PlayerView: View {
                         .clipShape(.rect(cornerRadius: 32))
                         .frame(maxWidth: 264)
                 }
+                .accessibilityHidden(true)
                 Spacer()
                 VStack(spacing: 24) {
+                    let durationFormat = Duration.UnitsFormatStyle(allowedUnits: [.seconds], width: .wide)
                     PlaybackHeader(trackName: song.displayName, artistName: song.artistName, isRepeating: Bindable(viewModel).isRepeating)
-                    SliderView(progress: Bindable(viewModel).progress) { isEditing in
+                    SliderView(progress: Bindable(viewModel).progress, totalDuration: viewModel.totalDuration) { isEditing in
                         viewModel.isScrubbing = isEditing
                     } minimumValueLabel: {
                         Text(Duration.seconds(viewModel.currentTime), format: .time(pattern: .minuteSecond))
+                            .accessibilityLabel(Duration.seconds(viewModel.currentTime).formatted(durationFormat))
                     } maximumValueLabel: {
                         Text(Duration.seconds(viewModel.remainingTime), format: .time(pattern: .minuteSecond))
+                            .accessibilityLabel(Duration.seconds(abs(viewModel.remainingTime)).formatted(durationFormat) + " remaining")
                     }
                     PlaybackControlsView()
                 }
@@ -58,20 +62,18 @@ struct PlayerView: View {
             let isIPad = UIDevice.current.userInterfaceIdiom == .pad
             if isIPad {
                 ToolbarItem {
-                    Button {
+                    Button("Playlist", systemImage: "music.note.list") {
                         showInspector.toggle()
-                    } label: {
-                        Image(systemName: "music.note.list")
                     }
+                    .labelStyle(.iconOnly)
                 }
             }
             ToolbarSpacer()
             ToolbarItem {
-                Button {
+                Button("More Actions", systemImage: "ellipsis") {
                     showActionSheet = true
-                } label: {
-                    Image(systemName: "ellipsis")
                 }
+                .labelStyle(.iconOnly)
             }
         }
         .sheet(isPresented: $showActionSheet) {
@@ -99,26 +101,23 @@ struct PlaybackControlsView: View {
         HStack {
             Spacer()
             HStack(spacing: 28) {
-                Button {
+                Button("Previous Song", systemImage: "backward.end.alt.fill") {
                     playerViewModel.returnToPreviousSong()
-                } label: {
-                    Image(systemName: "backward.end.alt.fill")
                 }
+                .labelStyle(.iconOnly)
                 .disabled(!playerViewModel.hasPrevious)
-                Button {
+                Button(playerViewModel.isPlaying ? "Pause" : "Play", systemImage: playerViewModel.isPlaying ? "pause.fill" : "play.fill") {
                     playerViewModel.isPlaying.toggle()
-                } label: {
-                    Image(systemName: playerViewModel.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.title)
-                        .padding()
-                        .contentTransition(.symbolEffect(.replace))
-                        .glassEffect()
                 }
-                Button {
+                .labelStyle(.iconOnly)
+                .font(.title)
+                .padding()
+                .contentTransition(.symbolEffect(.replace))
+                .glassEffect()
+                Button("Next Song", systemImage: "forward.end.alt.fill") {
                     playerViewModel.goToNextSong()
-                } label: {
-                    Image(systemName: "forward.end.alt.fill")
                 }
+                .labelStyle(.iconOnly)
                 .disabled(!playerViewModel.hasNext)
             }
             .tint(Color(.label))
@@ -144,12 +143,11 @@ fileprivate struct PlaybackHeader: View {
             Text(trackName)
                 .font(.largeTitle.bold())
             LabeledContent {
-                Button {
+                Button(isRepeating ? "Repeat One" : "Repeat All", systemImage: isRepeating ? "repeat.1" : "repeat") {
                     isRepeating.toggle()
-                } label: {
-                    Image(systemName: isRepeating ? "repeat.1" : "repeat")
-                        .symbolEffect(.bounce, value: isRepeating)
                 }
+                .labelStyle(.iconOnly)
+                .symbolEffect(.bounce, value: isRepeating)
                 .foregroundStyle(Color(.label))
             } label: {
                 Text(artistName)
